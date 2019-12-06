@@ -1,0 +1,5 @@
+.idea
+pom.xml
+*.iml
+src/*.iml
+src/main/java/bgu/spl/mics/.DS_Store
