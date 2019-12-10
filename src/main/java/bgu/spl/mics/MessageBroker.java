@@ -10,7 +10,6 @@ package bgu.spl.mics;
  * You cannot add methods to this interface.
  */
 public interface MessageBroker {
-
     /**
      * Subscribes {@code m} to receive {@link Event}s of type {@code type}.
      * <p>
