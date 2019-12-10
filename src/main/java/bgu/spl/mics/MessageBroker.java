@@ -5,7 +5,7 @@ package bgu.spl.mics;
  * Subscribers\Publishers.
  * It should be implemented as a thread-safe singleton.
  * The MessageBroker implementation must be thread-safe as
- * it is shared between fall the Subscribers\Publishers in the system.
+ * it is shared between all the Subscribers\Publishers in the system.
  * You must not alter any of the given methods of this interface. 
  * You cannot add methods to this interface.
  */

@@ -17,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Future<T> {
 
 	private T result;
-	private boolean isResolved;
+	private volatile boolean isResolved;
 	/**
 	 * This should be the the only public constructor in this class.
 	 */
@@ -44,11 +44,12 @@ public class Future<T> {
 	/**
      * Resolves the result of this Future object.
 	 *
-	 * @pre isDone()==false AND T!=null
-	 * @post isDone()==true AND get()=={@param result}
+	 * @pre  T!=null
+	 * @post get()=={@param result}
      */
 	public void resolve (T result) {
-		if(!isDone() && result!=null) {
+		//TODO : implement this correctly
+		if(result!=null) {
 			this.result = result; //maybe i should clone it- so it will be safe thread
 			isResolved = true;
 		}
@@ -93,4 +94,5 @@ public class Future<T> {
 		return null;
 	}
 
+	//await function
 }

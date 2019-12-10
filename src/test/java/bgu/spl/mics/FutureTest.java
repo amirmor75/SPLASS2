@@ -2,10 +2,13 @@ package bgu.spl.mics;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.TimeUnit;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FutureTest {
-    private Future<Object> tester;
+    private Future<Integer> tester;
 
     @BeforeEach
     public void setUp(){
@@ -13,36 +16,38 @@ public class FutureTest {
     }
 
     @Test
-    public void testBlockingGet(){
-        Object obj=tester.get();
-        assertEquals(true,tester.isDone());
-    }
-
-    @Test
     public void testResolveNotNullParam(){
-        Object obj=tester.get();
+        tester.resolve(5);
         tester.resolve(null);
-        assertEquals(obj,tester.get());
-    }
-
-    @Test
-    public void testResolveNotResolvedYet(){
-        //TODO: implement this ?
+        assertEquals(5,tester.get());
     }
 
     @Test
     public void testResolveSetResult(){
-        Object param=new Object();
+        Integer param=5;
         tester.resolve(param);
         assertEquals(param,tester.get());
     }
 
     @Test
     public void testResolveSetDone(){
-        Object param=new Object();
+        Integer param=5;
         tester.resolve(param);
         assertEquals(true,tester.isDone());
     }
 
+    @Test
+    public void testLimitedGet(){
+        tester.resolve(5);
+        Object obj=tester.get(1, TimeUnit.HOURS);
+        assertEquals(true,tester.isDone());
+    }
+
+    @Test
+    public void testLimitedGet_outOfTime(){
+        Object result=tester.get(1, TimeUnit.NANOSECONDS);
+        assertEquals(false,tester.isDone());
+        assertEquals(null,result);
+    }
 
 }
