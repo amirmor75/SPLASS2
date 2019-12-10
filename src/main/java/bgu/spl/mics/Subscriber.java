@@ -86,7 +86,7 @@ public abstract class Subscriber extends RunnableSubPub {
      *               {@code e}.
      */
     protected final <T> void complete(Event<T> e, T result) {
-        //TODO: implement this.
+        MessageBrokerImpl.getInstance().complete(e,result);
     }
 
     /**
@@ -105,7 +105,13 @@ public abstract class Subscriber extends RunnableSubPub {
     public final void run() {
         initialize();
         while (!terminated) {
-            System.out.println("NOT IMPLEMENTED!!!"); //TODO: you should delete this line :)
+            /**
+             * this is the message loop,
+             * 1. wait() for MB to put Event inside our queue
+             * 2. takes message and execute with callback
+             * 3. we know already what is callback
+             *
+              */
         }
     }
 

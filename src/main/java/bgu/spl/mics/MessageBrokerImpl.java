@@ -42,6 +42,12 @@ public class MessageBrokerImpl implements MessageBroker {
 	
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
+
+		/**impl:
+		 * 1.pushes e to a relevant queue.
+		 * 2. return Future<T>=new Future();
+		 */
+
 		// TODO Auto-generated method stub
 		return null;
 	}
