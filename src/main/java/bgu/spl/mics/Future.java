@@ -17,12 +17,15 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Future<T> {
 
 	private T result;
-	private volatile boolean isResolved;
+	private volatile boolean isDone;
+	
+
 	/**
 	 * This should be the the only public constructor in this class.
 	 */
 	public Future() {
-		isResolved=false;
+		result=null;
+		isDone=false;
 	}
 
 	/**
@@ -35,9 +38,13 @@ public class Future<T> {
 	 * @post isDone()==true
 	 * @return return the result of type T if it is available, if not wait until it is available.
      */
-	public T get() {
-		if(!isDone())
-			resolve(result);
+
+	public synchronized T  get() {
+			while (!isDone) {
+				/**
+				 *  result.wait()
+				 */
+			}	
 		return result;
 	}
 	
