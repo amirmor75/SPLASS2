@@ -14,6 +14,8 @@ public class Inventory {
 	private List<String> gadgets;
 	/**
      * Retrieves the single instance of this class.
+	 * @pre: none
+	 * @post: default
      */
 	public static Inventory getInstance() {
 		//TODO: Implement this
@@ -26,6 +28,9 @@ public class Inventory {
      * <p>
      * @param inventory 	Data structure containing all data necessary for initialization
      * 						of the inventory.
+	 * @pre: none
+	 * @pre: for each i  {@param inventory} inventory[i]!=null
+	 * @post: gadgets.size=={@pre gadget}.size()+inventory.size()
      */
 	public void load (String[] inventory) {
 		//TODO: Implement this
@@ -36,8 +41,12 @@ public class Inventory {
      * <p>
      * @param gadget 		Name of the gadget to check if available
      * @return 	‘false’ if the gadget is missing, and ‘true’ otherwise
+	 *
+	 * @pre: none
+	 * @post: exists()==true && gadgets.size()=={@pre gadgets}.size()-1
+	 * @post: exists()==false && gadgets.size()=={@pre gadgets}.size()
      */
-	boolean getItem(String gadget){
+	public boolean getItem(String gadget){
 		//TODO: Implement this
 		return true;
 	}
@@ -46,7 +55,7 @@ public class Inventory {
 	 *
 	 * <p>
 	 * Prints to a file name @filename a serialized object List<Gadget> which is a
-	 * List of all the reports in the diary.
+	 * List of all the gadgets in the diary.
 	 * This method is called by the main method in order to generate the output.
 	 */
 	public void printToFile(String filename){
