@@ -76,7 +76,16 @@ public class SquadTest {
      */
     @Test
     public void testSendAgents(){
-        // TODO Implement this
+        List<String> a=new LinkedList<String>();
+        a.add("001");
+        a.add("002");
+        int timeTick=100000000;
+        long startTime = System.nanoTime();
+        squad.sendAgents(a,timeTick);
+        long endTime = System.nanoTime();
+        long nanoDuration = (endTime - startTime);
+        long miliDuration=nanoDuration/1000000;
+        assertTrue(miliDuration>=timeTick);
     }
 
     /**
@@ -85,14 +94,18 @@ public class SquadTest {
      */
     @Test
     public void testLoad(){
-        // TODO Implement this
+        squad=new Squad();
+        agents=new Agent[2];
+        agents[0]=new Agent();
+        agents[0].setName("Amir Mor");
+        agents[0].setSerialNumber("001");
+        agents[0]=new Agent();
+        agents[0].setName("Dani Cohen");
+        agents[0].setSerialNumber("002");
+        squad.load(agents);
+        List<String> a=new LinkedList<String>();
+        a.add("001");
+        a.add("002");
+        assertTrue(squad.getAgents(a));// returns true if they exist
     }
-
-
-
-
-
-
-
-
 }
