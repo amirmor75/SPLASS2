@@ -46,8 +46,8 @@ public class Future<T> {
 				} catch (InterruptedException ignored) { }
 			}
 			result.notifyAll();
+			return result;
 		}
-		return result;
 	}
 
 	/**
@@ -97,8 +97,8 @@ public class Future<T> {
 				}
 				result.notifyAll();
 			}
+			return result;
 		}
-		return result;
 	}
 
 }
