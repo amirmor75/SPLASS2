@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
 
+import com.google.gson.Gson;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Iterator;
@@ -32,7 +34,7 @@ public class Inventory {
 	}
 
 	private synchronized Iterator<String> iterator(){
-		return new Iterator<String>() { //Anonymous
+		return new Iterator<String>() { //Anonymous class
 			final int originalVersion = version;
 			int index = 0;
 
@@ -43,7 +45,7 @@ public class Inventory {
 			public String next(){
 				synchronized (this) {
 					if (originalVersion != version)
-						throw new IllegalStateException("The version changed");
+						throw new IllegalStateException("The version has changed");
 					String gad = gadgets.get(index);
 					index++;
 					return gad;
@@ -93,16 +95,19 @@ public class Inventory {
 	 * Prints to a file name @filename a serialized object List<Gadget> which is a
 	 * List of all the gadgets in the diary.
 	 * This method is called by the main method in order to generate the output.
+	 * implemented by optimistic try and fail
 	 */
 	public void printToFile(String filename){
-		//Gson gson = new Gson();
+		Gson gson = new Gson();
+		File file=new File(filename);
 		try{
+			FileWriter writer = new FileWriter(file);
 			Iterator<String> gad=iterator();
 			while(gad.hasNext()){
-
+				gson.toJson(gad.next(), writer);
 			}
 		}catch(Exception e){
-			//clearFile
+			file.delete();
 			printToFile(filename);
 		}
 	}

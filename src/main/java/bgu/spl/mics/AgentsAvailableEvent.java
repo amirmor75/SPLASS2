@@ -9,6 +9,6 @@ import bgu.spl.mics.application.passiveObjects.Agent;
  * When sending an event, it will be received only by a single subscriber in a
  * Round-Robin fashion.
  */
-public interface AgentsAvailableEvent extends Event<Agent> {
+public interface AgentsAvailableEvent extends Event<Boolean> {
 
 }
