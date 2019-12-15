@@ -1,5 +1,7 @@
 package bgu.spl.mics;
 
+import java.util.concurrent.LinkedBlockingQueue;
+
 /**
  * The Subscriber is an abstract class that any subscriber in the system
  * must extend. The abstract Subscriber class is responsible to get and
@@ -16,7 +18,12 @@ package bgu.spl.mics;
  * <p>
  */
 public abstract class Subscriber extends RunnableSubPub {
+
+    private SimplePublisher publisher;
     private boolean terminated = false;
+    private LinkedBlockingQueue<? extends Message> messages;
+    private Class<? extends Message> messageType;
+    private Callback<? extends Message> callback;
 
     /**
      * @param name the Subscriber name (used mainly for debugging purposes -
@@ -24,6 +31,8 @@ public abstract class Subscriber extends RunnableSubPub {
      */
     public Subscriber(String name) {
         super(name);
+        publisher=new SimplePublisher();
+        messages=new LinkedBlockingQueue<>();
     }
 
     /**
@@ -48,7 +57,9 @@ public abstract class Subscriber extends RunnableSubPub {
      *                 queue.
      */
     protected final <T, E extends Event<T>> void subscribeEvent(Class<E> type, Callback<E> callback) {
-        //TODO: implement this.
+        MessageBrokerImpl.getInstance().subscribeEvent(type,this);
+        messageType=type;
+        this.callback=callback;
     }
 
     /**
@@ -72,7 +83,9 @@ public abstract class Subscriber extends RunnableSubPub {
      *                 queue.
      */
     protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
-        //TODO: implement this.
+        MessageBrokerImpl.getInstance().subscribeBroadcast(type,this);
+        messageType=type;
+        this.callback=callback;
     }
 
     /**
@@ -98,19 +111,23 @@ public abstract class Subscriber extends RunnableSubPub {
     }
 
     /**
-     * The entry point of the Subscriber. TODO: you must complete this code
+     * The entry point of the Subscriber.
      * otherwise you will end up in an infinite loop.
      */
     @Override
     public final void run() {
+        MessageBrokerImpl.getInstance().register(this);
         initialize();
         while (!terminated) {
+            try {
+                MessageBrokerImpl.getInstance().awaitMessage(this);
+                //callback.call(messages.take()); the call function should be implemented
+            }catch(InterruptedException illegal){ MessageBrokerImpl.getInstance().register(this); }
             /**
              * this is the message loop,
              * 1. wait() for MB to put Event inside our queue
              * 2. takes message and execute with callback
-             * 3. we know already what is callback
-             *
+             * 3. we know already what his callback
               */
         }
     }
