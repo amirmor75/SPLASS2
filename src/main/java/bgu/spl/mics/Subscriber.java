@@ -1,5 +1,6 @@
 package bgu.spl.mics;
 
+import java.util.Hashtable;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -21,9 +22,11 @@ public abstract class Subscriber extends RunnableSubPub {
 
     private SimplePublisher publisher;
     private boolean terminated = false;
-    private LinkedBlockingQueue<? extends Message> messages;
-    private Class<? extends Message> messageType;
-    private Callback<? extends Message> callback;
+    /**
+     * The abstract Subscriber stores this callback together with the
+     * type of the message is related to.
+     */
+    private Hashtable<Class<? extends Message>,Callback<? extends Message>> callbacks;
 
     /**
      * @param name the Subscriber name (used mainly for debugging purposes -
@@ -32,7 +35,6 @@ public abstract class Subscriber extends RunnableSubPub {
     public Subscriber(String name) {
         super(name);
         publisher=new SimplePublisher();
-        messages=new LinkedBlockingQueue<>();
     }
 
     /**
@@ -58,8 +60,7 @@ public abstract class Subscriber extends RunnableSubPub {
      */
     protected final <T, E extends Event<T>> void subscribeEvent(Class<E> type, Callback<E> callback) {
         MessageBrokerImpl.getInstance().subscribeEvent(type,this);
-        messageType=type;
-        this.callback=callback;
+        callbacks.put(type,callback);
     }
 
     /**
@@ -84,8 +85,7 @@ public abstract class Subscriber extends RunnableSubPub {
      */
     protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
         MessageBrokerImpl.getInstance().subscribeBroadcast(type,this);
-        messageType=type;
-        this.callback=callback;
+        callbacks.put(type,callback);
     }
 
     /**
@@ -121,8 +121,10 @@ public abstract class Subscriber extends RunnableSubPub {
         while (!terminated) {
             try {
                 MessageBrokerImpl.getInstance().awaitMessage(this);
-                //callback.call(messages.take()); the call function should be implemented
+                //callbacks.call(messages.take()); //the call function should be implemented- Lambdas
             }catch(InterruptedException illegal){ MessageBrokerImpl.getInstance().register(this); }
+            MessageBrokerImpl.getInstance().unregister(this);
+
             /**
              * this is the message loop,
              * 1. wait() for MB to put Event inside our queue

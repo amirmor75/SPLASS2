@@ -1,5 +1,9 @@
 package bgu.spl.mics;
 
+
+import java.util.Hashtable;
+import java.util.concurrent.LinkedBlockingQueue;
+
 /**
  * The {@link MessageBrokerImpl class is the implementation of the MessageBroker interface.
  * Write your implementation here!
@@ -7,12 +11,22 @@ package bgu.spl.mics;
  */
 public class MessageBrokerImpl implements MessageBroker {
 
+	private static MessageBroker instance=null;
+	/**
+	 * Hashtable is a synchronized data structure in JAVA
+	 * for every subscriber-Key, will be a blockingQueue of Events
+	 */
+	private Hashtable<Subscriber,LinkedBlockingQueue<? extends Message>> subscribers;
+
 	/**
 	 * Retrieves the single instance of this class.
 	 */
 	public static MessageBroker getInstance() {
-		//TODO: Implement this
-		return null;
+		synchronized (instance) {
+			if (instance == null)
+				instance = new MessageBrokerImpl();
+			return instance;
+		}
 	}
 
 	@Override
@@ -52,10 +66,12 @@ public class MessageBrokerImpl implements MessageBroker {
 		return null;
 	}
 
+	/**
+	 * insert a new subscriber into the hashtable and initialize its queue
+	 */
 	@Override
 	public void register(Subscriber m) {
-		// TODO Auto-generated method stub
-
+		subscribers.put(m,new LinkedBlockingQueue<>());
 	}
 
 	@Override
