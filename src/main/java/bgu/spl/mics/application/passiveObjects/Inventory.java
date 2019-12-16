@@ -1,5 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
 
+
+
+
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -26,11 +29,18 @@ public class Inventory {
 	 * @post: default
      */
 	public static Inventory getInstance() {
-		synchronized (instance) {
+		/**
+		 * amir wants the instance to be uniq and some objects can touch it,
+		 * not creating new one
+		 * so why? i ask... can only hope to ever know
+		 *
+		 */
+		synchronized (instance) { // why tal why????
 			if (instance == null)
 				instance = new Inventory();
 			return instance;
 		}
+		//מוטל בספק
 	}
 
 	private synchronized Iterator<String> iterator(){

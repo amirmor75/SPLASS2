@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
 
+
+
 import java.util.List;
 
 /**
@@ -11,16 +13,19 @@ import java.util.List;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Diary {
+	private static Diary instance;
+	private volatile List<Report> reports;
+
+
 	/**
 	 * Retrieves the single instance of this class.
 	 */
 	public static Diary getInstance() {
-		//TODO: Implement this
-		return null;
+		return instance;
 	}
 
 	public List<Report> getReports() {
-		return null;
+		return reports;
 	}
 
 	/**
@@ -28,7 +33,7 @@ public class Diary {
 	 * @param reportToAdd - the report to add
 	 */
 	public void addReport(Report reportToAdd){
-		//TODO: Implement this
+		reports.add(reportToAdd);
 	}
 
 	/**
