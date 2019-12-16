@@ -1,14 +1,13 @@
 package bgu.spl.mics;
 
 public class GadgetAvailableEventTask implements GadgetAvailableEvent {
-    private String gadgetName;
-    private Future<String> myFuture;
+    private Future<String> gadget;
 
-    public Future<String> getMyFuture() {
-        return myFuture;
+    public void initEvent(){
+        gadget=new Future<>();
     }
 
-    public String getGadgetName(){
-        return gadgetName;
+    public Future<String> getFuture() {
+        return gadget;
     }
 }

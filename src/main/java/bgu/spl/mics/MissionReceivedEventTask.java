@@ -1,21 +1,15 @@
 package bgu.spl.mics;
 
-import java.util.List;
+import bgu.spl.mics.application.passiveObjects.MissionInfo;
 
 public class MissionReceivedEventTask implements MissionReceivedEvent {
-    private List<String> agentsSerials;
-    private String gadget;
-    private String missionName;
+    private Future<MissionInfo> info;
 
-    public List<String> getAgentsSerials() {
-        return agentsSerials;
+    public void initEvent(){
+        info=new Future<>();
     }
 
-    public String getGadget() {
-        return gadget;
-    }
-
-    public String getMissionName() {
-        return missionName;
+    public Future<MissionInfo> getFuture(){
+        return info;
     }
 }

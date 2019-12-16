@@ -1,4 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -11,13 +13,17 @@ import java.util.Map;
 public class Squad {
 
 	private Map<String, Agent> agents;
+	private static Squad instance=null;
 
 	/**
 	 * Retrieves the single instance of this class.
 	 */
 	public static Squad getInstance() {
-		//TODO: Implement this
-		return null;
+		synchronized (instance) {
+			if (instance == null)
+				instance = new Squad();
+			return instance;
+		}
 	}
 
 	/**
@@ -26,23 +32,52 @@ public class Squad {
 	 * @param inventory 	Data structure containing all data necessary for initialization
 	 * 						of the squad.
 	 */
-	public void load (Agent[] inventory) {
-		// TODO Implement this
+	public synchronized void load (Agent[] inventory) {
+		for(int i=0;i<inventory.length;i++){
+			agents.put(inventory[i].getSerialNumber(),inventory[i]);
+		}
 	}
 
 	/**
 	 * Releases agents.
 	 */
-	public void releaseAgents(List<String> serials){
-		// TODO Implement this
+	public synchronized void releaseAgents(List<String> serials){
+		Iterator<String> serial=serials.iterator();
+		while(serial.hasNext()){
+			agents.remove(serial.next());
+		}
 	}
 
 	/**
 	 * simulates executing a mission by calling sleep.
 	 * @param time   milliseconds to sleep
 	 */
-	public void sendAgents(List<String> serials, int time){
-		// TODO Implement this
+	public synchronized void sendAgents(List<String> serials, int time){
+		try {Thread.sleep(time);} catch (InterruptedException e) {}
+		Iterator<String> serial=serials.iterator();
+		Agent agent;
+		while(serial.hasNext()){
+			agent=agents.get(serial.next());
+			if(agent!=null)
+				agent.release();
+		}
+	}
+
+	/**
+	 * this is a blocking method- it wait until the agent is available for new mission
+	 * when the agent available- He will be acquired to new mission
+	 * @param agent an Agent from the map
+	 */
+	private void acquireAgent(Agent agent){
+		synchronized (agent) {
+			while (!agent.isAvailable()) {
+				try {
+					agent.wait();
+				} catch (InterruptedException ignored) { }
+			}
+			agent.acquire();
+			agent.notifyAll();
+		}
 	}
 
 	/**
@@ -50,9 +85,21 @@ public class Squad {
 	 * @param serials   the serial numbers of the agents
 	 * @return ‘false’ if an agent of serialNumber ‘serial’ is missing, and ‘true’ otherwise
 	 */
-	public boolean getAgents(List<String> serials){
-		// TODO Implement this
-		return false;
+	public synchronized boolean getAgents(List<String> serials){
+		boolean allExists=true;
+		String agentName;
+		Agent agent;
+		Iterator<String> serial=serials.iterator();
+		while(serial.hasNext()){
+			agentName=serial.next();
+			if(!agents.containsKey(agentName))
+				allExists=false;
+			else{
+				agent=agents.get(agentName);
+				acquireAgent(agent);
+			}
+		}
+		return allExists;
 	}
 
     /**
@@ -61,8 +108,15 @@ public class Squad {
      * @return a list of the names of the agents with the specified serials.
      */
     public List<String> getAgentsNames(List<String> serials){
-        // TODO Implement this
-	    return null;
+        List<String> names=new LinkedList<>();
+        Iterator<String> serial=serials.iterator();
+        Agent agent;
+        while(serial.hasNext()){
+        	agent=agents.get(serial.next());
+        	if(agent!=null)
+        		names.add(agent.getName());
+		}
+        return names;
     }
 
 }

@@ -1,16 +1,19 @@
 package bgu.spl.mics;
 
-import bgu.spl.mics.application.passiveObjects.Agent;
 
 public class AgentsAvailableEventTask implements AgentsAvailableEvent {
-    private Agent result;
-    private Future<Agent> myFuture;
+    /**
+     * states whether or not a certain 00 agent (or a couple of them)
+     *  is available to execute a mission
+     */
+    private Future<Boolean> isAvailable;
 
-    public Future<Agent> getMyFuture() {
-        return myFuture;
+    public void initEvent(){
+        isAvailable=new Future<>();
     }
 
-    public Agent getResult() {
-        return result;
+    public Future<Boolean> getFuture() {
+        return isAvailable;
     }
+
 }

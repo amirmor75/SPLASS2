@@ -13,11 +13,14 @@ package bgu.spl.mics;
  */
 public abstract class Publisher extends RunnableSubPub {
 
+    private SimplePublisher publisher;
+
     /**
      * @param name the Publisher name (used mainly for debugging purposes -
      *             does not have to be unique)
      */
     public Publisher(String name) {
         super(name);
+        publisher=new SimplePublisher();
     }
 }
