@@ -1,7 +1,10 @@
 package bgu.spl.mics.application.passiveObjects;
 
+import com.google.gson.Gson;
 
-
+import java.io.File;
+import java.io.FileWriter;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -14,7 +17,9 @@ import java.util.List;
  */
 public class Diary {
 	private static Diary instance;
-	private volatile List<Report> reports;
+	private List<Report> reports;
+	private int version=0;
+	private int total=0;
 
 
 	/**
@@ -32,8 +37,10 @@ public class Diary {
 	 * adds a report to the diary
 	 * @param reportToAdd - the report to add
 	 */
-	public void addReport(Report reportToAdd){
-		reports.add(reportToAdd);
+	public void addReport(Report reportToAdd){//not elegant, need to be atomic!!!!!
+		synchronized (this){
+			reports.add(reportToAdd);
+		}
 	}
 
 	/**
@@ -44,7 +51,44 @@ public class Diary {
 	 * This method is called by the main method in order to generate the output.
 	 */
 	public void printToFile(String filename){
-		//TODO: Implement this
+		Gson gson = new Gson();
+		File file=new File(filename);
+		try{
+			FileWriter writer = new FileWriter(file);
+			Iterator<Report> reportIterator=iterator();
+			while(reportIterator.hasNext()){
+				Report currentRep=reportIterator.next();
+				String missionName=currentRep.getMissionName();
+				int timeCreated=currentRep.getTimeCreated();
+				int M=currentRep.getM();
+				String info= String.format("missionName: %s, timeCreated: %s,M: %s",missionName,timeCreated,M);
+				gson.toJson(info,writer);
+			}
+			gson.toJson("number of missions:"+total,writer);
+		}catch(Exception e){
+			file.delete();
+			printToFile(filename);
+		}
+	}
+	private synchronized Iterator<Report> iterator(){
+		return new Iterator<Report>() { //Anonymous class
+			final int originalVersion = version;
+			int index = 0;
+
+			public boolean hasNext() {
+				return index < reports.size();
+			}
+
+			public Report next(){
+				synchronized (this) {
+					if (originalVersion != version)
+						throw new IllegalStateException("The version has changed");
+					Report report = reports.get(index);
+					index++;
+					return report;
+				}
+			}
+		};
 	}
 
 	/**
@@ -52,7 +96,6 @@ public class Diary {
 	 * @return the total number of received missions (executed / aborted) be all the M-instances.
 	 */
 	public int getTotal(){
-		//TODO: Implement this
-		return 0;
+		return total;
 	}
 }

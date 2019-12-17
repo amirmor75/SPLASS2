@@ -9,6 +9,7 @@ import java.util.List;
  * You may add ONLY private fields and methods to this class.
  */
 public class Report {
+
 	private String missionName;
 	private int m;
 	private int moneypenny;
@@ -18,6 +19,7 @@ public class Report {
 	private int qTime;
 	private int timeIssued;
 	private int timeCreated;
+
 
 
 	/**
