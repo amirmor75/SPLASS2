@@ -1,5 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
 
+
+
+
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -17,7 +20,7 @@ import java.util.List;
  */
 public class Inventory {
 	private List<String> gadgets;
-	private static Inventory instance=null;
+	private static Inventory instance=new Inventory();
 	private int version=0;
 
 	/**
@@ -26,11 +29,7 @@ public class Inventory {
 	 * @post: default
      */
 	public static Inventory getInstance() {
-		synchronized (instance) {
-			if (instance == null)
-				instance = new Inventory();
 			return instance;
-		}
 	}
 
 	private synchronized Iterator<String> iterator(){
@@ -39,17 +38,26 @@ public class Inventory {
 			int index = 0;
 
 			public boolean hasNext() {
-				return gadgets.size()>0;
+				//try {
+					if (originalVersion != version) {
+						throw new IllegalStateException("The version has changed");
+					}
+					return index < gadgets.size();
+				//}catch (){
+				//}
 			}
 
 			public String next(){
-				synchronized (this) {
-					if (originalVersion != version)
-						throw new IllegalStateException("The version has changed");
-					String gad = gadgets.get(index);
-					index++;
-					return gad;
-				}
+				//try{
+					synchronized (this) {
+						if (originalVersion != version)
+							throw new IllegalStateException("The version has changed");
+						String gad = gadgets.get(index);
+						index++;
+						return gad;
+					}
+				//}catch(){
+				//}
 			}
 		};
 	}
