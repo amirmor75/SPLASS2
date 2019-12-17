@@ -19,9 +19,6 @@ public class Report {
 	private int qTime;
 	private int timeIssued;
 	private int timeCreated;
-
-
-
 	/**
      * Retrieves the mission name.
      */

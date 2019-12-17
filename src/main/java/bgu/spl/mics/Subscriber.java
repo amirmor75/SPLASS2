@@ -1,7 +1,6 @@
 package bgu.spl.mics;
 
 import java.util.Hashtable;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The Subscriber is an abstract class that any subscriber in the system
@@ -26,7 +25,7 @@ public abstract class Subscriber extends RunnableSubPub {
      * The abstract Subscriber stores this callback together with the
      * type of the message is related to.
      */
-    private Hashtable<Class<? extends Message>,Callback<? extends Message>> callbacks;
+    private Hashtable<Class<? extends Message>,Callback> callbacks;
 
     /**
      * @param name the Subscriber name (used mainly for debugging purposes -

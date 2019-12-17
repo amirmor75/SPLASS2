@@ -38,14 +38,13 @@ public class Future<T> {
 	 * @return return the result of type T if it is available, if not wait until it is available.
 	 */
 
-	public T  get() {
-		synchronized (result) {
-			while (!isDone.get()) {
+	public T get() {
+		synchronized (this) {
+			while (!isDone()) {
 				try {
-					result.wait();
+					this.wait(); // may sleep forever.
 				} catch (InterruptedException ignored) { }
 			}
-			result.notifyAll();
 			return result;
 		}
 	}
@@ -56,11 +55,12 @@ public class Future<T> {
 	 * @pre  T!=null
 	 * @post get()=={@param result}
 	 */
-	public synchronized void resolve (T result) {
-		if(result!=null) {
-			this.result = result;
-			isDone.set(true);
-		}
+	public synchronized void resolve (T result) {//not safe
+		// amir deleted if(result!= null)
+		this.result = result;
+		isDone.set(true);
+		this.notifyAll();// amir added, need to notify "this" it is awake
+
 	}
 
 	/**
@@ -87,17 +87,20 @@ public class Future<T> {
 	 *         elapsed, return null.
 	 */
 	public T get(long timeout, TimeUnit unit) {
-		synchronized(result) {
+
+		synchronized(this) {// amir changed to this from result
 			if (unit != null) {
 				TimeUnit milliTime=TimeUnit.MILLISECONDS;
 				while (!isDone()) {
 					try {
-						result.wait(milliTime.convert(timeout,unit)); //waiting for {@param timeout} milliseconds
-					} catch (InterruptedException ignored) { }
+						this.wait(milliTime.convert(timeout, unit)); //waiting for {@param timeout} milliseconds
+					} catch (InterruptedException ignored) {
+					}
 				}
-				result.notifyAll();
 			}
-			return result;
+			if(isDone())
+				return result;
+			return null;
 		}
 	}
 

@@ -18,7 +18,7 @@ public class M extends Subscriber {
 	}
 
 	@Override
-	protected synchronized void initialize() {// provokes rgister, defines callback
+	protected synchronized void initialize() {// provokes register, defines callback
 		//our callback wait() for the AgentsAvailableEvent we sent to Moneypenny
 		/**
 		 * callback impl:
