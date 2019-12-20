@@ -117,7 +117,7 @@ public abstract class Subscriber extends RunnableSubPub {
     public final void run() {
         MessageBrokerImpl.getInstance().register(this);
         initialize();
-        while (!terminated) {
+        while (Thread.currentThread().isInterrupted()) {//not !terminated
             try {
                 MessageBrokerImpl.getInstance().awaitMessage(this);
                 //callbacks.call(messages.take()); //the call function should be implemented- Lambdas
