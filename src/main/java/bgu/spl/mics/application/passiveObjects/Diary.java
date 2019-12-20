@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
 
+
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -16,17 +17,19 @@ import java.util.List;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Diary {
-	private static Diary instance;
 	private List<Report> reports;
 	private int version=0;
 	private int total=0;
+	private static class SingletonHolder {
+		private static Diary instance = new Diary();
+	}
 
 
 	/**
 	 * Retrieves the single instance of this class.
 	 */
 	public static Diary getInstance() {
-		return instance;
+		return SingletonHolder.instance;
 	}
 
 	public List<Report> getReports() {

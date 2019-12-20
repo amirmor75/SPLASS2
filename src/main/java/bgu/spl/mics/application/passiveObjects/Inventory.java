@@ -20,16 +20,17 @@ import java.util.List;
  */
 public class Inventory {
 	private List<String> gadgets;
-	private static Inventory instance=new Inventory();
 	private int version=0;
-
+	private static class SingletonHolder {
+		private static Inventory instance=new Inventory();
+	}
 	/**
      * Retrieves the single instance of this class.
 	 * @pre: none
 	 * @post: default
      */
 	public static Inventory getInstance() {
-			return instance;
+			return SingletonHolder.instance;
 	}
 
 	private synchronized Iterator<String> iterator(){
