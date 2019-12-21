@@ -12,39 +12,38 @@ import java.util.Map;
  */
 public class Squad {
 
-	private Map<String, Agent> agents;
-	private static Squad instance=null;
+	private Map<String, Agent> agentMap;//serial number is the key
+
+	private static class SingletonHolder {
+		private static Squad instance=new Squad();
+	}
 
 	/**
 	 * Retrieves the single instance of this class.
 	 */
+
 	public static Squad getInstance() {
-		synchronized (instance) {
-			if (instance == null)
-				instance = new Squad();
-			return instance;
-		}
+		return SingletonHolder.instance;
 	}
 
 	/**
 	 * Initializes the squad. This method adds all the agents to the squad.
 	 * <p>
-	 * @param inventory 	Data structure containing all data necessary for initialization
+	 * @param agents 	Data structure containing all data necessary for initialization
 	 * 						of the squad.
 	 */
-	public synchronized void load (Agent[] inventory) {
-		for(int i=0;i<inventory.length;i++){
-			agents.put(inventory[i].getSerialNumber(),inventory[i]);
-		}
+	public synchronized void load (Agent[] agents) {
+		for (Agent agent: agents)
+			agentMap.put(agent.getSerialNumber(),agent);
+
 	}
 
 	/**
 	 * Releases agents.
 	 */
 	public synchronized void releaseAgents(List<String> serials){
-		Iterator<String> serial=serials.iterator();
-		while(serial.hasNext()){
-			agents.remove(serial.next());
+		for (String serial: serials) {
+			agentMap.get(serial).release();
 		}
 	}
 
@@ -53,14 +52,8 @@ public class Squad {
 	 * @param time   milliseconds to sleep
 	 */
 	public synchronized void sendAgents(List<String> serials, int time){
-		try {Thread.sleep(time);} catch (InterruptedException e) {}
-		Iterator<String> serial=serials.iterator();
-		Agent agent;
-		while(serial.hasNext()){
-			agent=agents.get(serial.next());
-			if(agent!=null)
-				agent.release();
-		}
+		try {Thread.sleep(time);} catch (InterruptedException ignored) {}
+		releaseAgents(serials);
 	}
 
 	/**
@@ -68,15 +61,15 @@ public class Squad {
 	 * when the agent available- He will be acquired to new mission
 	 * @param agent an Agent from the map
 	 */
-	private void acquireAgent(Agent agent){
-		synchronized (agent) {
+	private void acquireAgent(Agent agent){// to fix
+		synchronized (this) {// not good at all
 			while (!agent.isAvailable()) {
 				try {
 					agent.wait();
 				} catch (InterruptedException ignored) { }
 			}
 			agent.acquire();
-			agent.notifyAll();
+			agent.notifyAll();// not good 
 		}
 	}
 
@@ -86,20 +79,16 @@ public class Squad {
 	 * @return ‘false’ if an agent of serialNumber ‘serial’ is missing, and ‘true’ otherwise
 	 */
 	public synchronized boolean getAgents(List<String> serials){
-		boolean allExists=true;
-		String agentName;
-		Agent agent;
-		Iterator<String> serial=serials.iterator();
-		while(serial.hasNext()){
-			agentName=serial.next();
-			if(!agents.containsKey(agentName))
-				allExists=false;
+		for (String s:serials){
+			if(!agentMap.containsKey(s)){
+				releaseAgents(serials);
+				return false;
+			}
 			else{
-				agent=agents.get(agentName);
-				acquireAgent(agent);
+				acquireAgent(agentMap.get(s));
 			}
 		}
-		return allExists;
+		return true;
 	}
 
     /**
@@ -112,7 +101,7 @@ public class Squad {
         Iterator<String> serial=serials.iterator();
         Agent agent;
         while(serial.hasNext()){
-        	agent=agents.get(serial.next());
+        	agent=agentMap.get(serial.next());
         	if(agent!=null)
         		names.add(agent.getName());
 		}

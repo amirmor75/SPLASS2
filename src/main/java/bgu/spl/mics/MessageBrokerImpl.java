@@ -2,7 +2,6 @@ package bgu.spl.mics;
 
 
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -20,109 +19,84 @@ public class MessageBrokerImpl implements MessageBroker {
 	 * Hashtable is a synchronized data structure in JAVA
 	 * for every subscriber-Key, will be a blockingQueue of Events
 	 */
-	private Hashtable< Subscriber , LinkedBlockingQueue<Message> > subscribers;
-	private Hashtable< Class<? extends Message> , LinkedList<Subscriber> > typesMap;
+	private Hashtable< Subscriber , LinkedBlockingQueue<Message> > subscribers=new Hashtable<>();
+	private Hashtable< Class<? extends Event> , LinkedBlockingQueue<Subscriber>> eventSubscriberMap=new Hashtable<>();
+	private Hashtable< Class<? extends Broadcast> , LinkedBlockingQueue<Subscriber>> broadcastSubscriberMap=new Hashtable<>();
+	private Hashtable<Event,Future> futureMap=new Hashtable<>();
+
 	/**
 	 * Retrieves the single instance of this class.
 	 */
 
-	public static MessageBroker getInstance() { // STATUS: safe
+	public static MessageBroker getInstance() {//safe
 		return SingletonHolder.instance;
 	}
 
 	@Override
-	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
-		//s adds m to the relevant list of this type
-		synchronized (this) {//never!!!!!!
-			LinkedList<Subscriber> typeSubscribers=typesMap.get(type);
-			typeSubscribers.add(m);
-			typesMap.replace(type,typeSubscribers);
-			//replaces only if type is mapped to some value in the hashtable !!!!
-		}
-		//f
-
+	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {//safe
+		eventSubscriberMap.get(type).add(m);
 	}
 
 	@Override
-	public void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber m) {
-		//s adds m to the relevant list of this type
-		synchronized (this) {//never!!!!!!
-			LinkedList<Subscriber> typeSubscribers=typesMap.get(type);
-			typeSubscribers.add(m);
-			typesMap.replace(type,typeSubscribers);
-			//replaces only if type is mapped to some value in the hashtable !!!!
-		}
-		//f
-
+	public void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber m) {//safe
+		broadcastSubscriberMap.get(type).add(m);
 	}
 
 	@Override
-	public <T> void complete(Event<T> e, T result) {
-		//dont know what to do with e...
-		synchronized (this){//not good
-			e.getFuture().resolve(result);
-		}
-
-
+	public <T> void complete(Event<T> e, T result) {//safe
+		futureMap.get(e).resolve(result);
 	}
 
 	@Override
-	public void sendBroadcast(Broadcast b) {
-		// TODO Auto-generated method stub
-
+	public void sendBroadcast(Broadcast b) {//safe
+		try {
+			LinkedBlockingQueue<Subscriber> callTo = broadcastSubscriberMap.get(b.getClass());
+			for (Subscriber s : callTo) {
+				subscribers.get(s).put(b);
+			}
+		}catch (InterruptedException ignore){}
 	}
 
 	
 	@Override
-	public <T> Future<T> sendEvent(Event<T> e) {
-		/**impl:
-		 * 1.pushes e to a relevant queue.
-		 * 2. return Future<T>=new Future();
-		 */
+	public <T> Future<T> sendEvent(Event<T> e) {//safe
 		try {
-			synchronized (this) {//never !!!!
-				LinkedList<Subscriber> subsToType = typesMap.get(e.getClass());
-				//inserts e to some queue(depends on our implementation) in SubsToType
-				Subscriber receiver = ((subsToType.getLast()));//depends on our implementation
-				LinkedBlockingQueue<Message> receiverQueue = subscribers.get(receiver);
-				receiverQueue.put(e);
-			}
-		}catch (InterruptedException msg){
-			msg.printStackTrace();
-		}
-		return e.getFuture();
+			LinkedBlockingQueue<Subscriber> subsToType = eventSubscriberMap.get(e.getClass());
+			Subscriber roundRobined=subsToType.take();
+			subscribers.get(roundRobined).put(e);
+			subsToType.put(roundRobined);
+		}catch (InterruptedException ignored){}
+		Future<T> future=new Future<>();
+		futureMap.put(e,future);
+		return future;
 	}
 
 	/**
 	 * insert a new subscriber into the hashtable and initialize its queue
 	 */
 	@Override
-	public void register(Subscriber m){// thread safe
+	public void register(Subscriber m){//safe
 		LinkedBlockingQueue<Message> mQueue=new LinkedBlockingQueue<>();
 		subscribers.putIfAbsent(m, mQueue);
 	}
 
 	@Override
-	public void unregister(Subscriber m) {//not safe
-		synchronized (this) {
-			subscribers.remove(m);//if m is not there returns null, maybe useful in the future
-			//s removes m from type map.(if to some key it is not there does nothing)
-			Set<Class<? extends Message>> keys = typesMap.keySet();
-			for (Class<? extends Message> key: keys) {
-				typesMap.get(key).remove(m);
+	public void unregister(Subscriber m) {//not really safe
+		synchronized (this) {//because deleting is not safe for the use of other threads
+			Set<Class<? extends Event>> Ekeys = eventSubscriberMap.keySet();
+			for (Class<? extends Event> key : Ekeys) {
+				eventSubscriberMap.get(key).remove(m);
 			}
-			//f
+			Set<Class<? extends Broadcast>> Bkeys = broadcastSubscriberMap.keySet();
+			for (Class<? extends Broadcast> key : Bkeys) {
+				broadcastSubscriberMap.get(key).remove(m);
+			}
+			subscribers.remove(m);
 		}
 	}
 
 	@Override
 	public Message awaitMessage(Subscriber m) throws InterruptedException {
 		return subscribers.get(m).take();
-		// will it ever change if at the moment i take queue it is empty?
-		//doesnt take in calculation interrupt..
-
 	}
-
-	
-
 }

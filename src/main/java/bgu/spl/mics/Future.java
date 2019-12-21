@@ -42,7 +42,7 @@ public class Future<T> {
 		synchronized (this) {
 			while (!isDone()) {
 				try {
-					this.wait(); // may sleep forever.
+					this.wait();
 				} catch (InterruptedException ignored) { }
 			}
 			return result;

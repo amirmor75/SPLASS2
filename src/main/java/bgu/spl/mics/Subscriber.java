@@ -19,7 +19,6 @@ import java.util.Hashtable;
  */
 public abstract class Subscriber extends RunnableSubPub {
 
-    private SimplePublisher publisher;
     private boolean terminated = false;
     /**
      * The abstract Subscriber stores this callback together with the
@@ -33,7 +32,6 @@ public abstract class Subscriber extends RunnableSubPub {
      */
     public Subscriber(String name) {
         super(name);
-        publisher=new SimplePublisher();
     }
 
     /**
@@ -117,11 +115,11 @@ public abstract class Subscriber extends RunnableSubPub {
     public final void run() {
         MessageBrokerImpl.getInstance().register(this);
         initialize();
-        while (Thread.currentThread().isInterrupted()) {//not !terminated
+        while (!terminated) {//!terminated is given
             try {
-                MessageBrokerImpl.getInstance().awaitMessage(this);
-                //callbacks.call(messages.take()); //the call function should be implemented- Lambdas
-            }catch(InterruptedException illegal){ MessageBrokerImpl.getInstance().register(this); }
+                Message m=MessageBrokerImpl.getInstance().awaitMessage(this);
+                callbacks.get(m.getClass()).call(m);
+            }catch(InterruptedException illegal){ MessageBrokerImpl.getInstance().register(this); }//????
             MessageBrokerImpl.getInstance().unregister(this);
 
             /**

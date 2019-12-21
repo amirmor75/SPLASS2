@@ -2,16 +2,16 @@ package bgu.spl.mics;
 
 import bgu.spl.mics.application.passiveObjects.MissionInfo;
 
-public class MissionReceivedEventTask implements MissionReceivedEvent {
+public class MissionReceivedEvent implements Event<MissionInfo> {
 
 
     private MissionInfo eventInformation;
     private Future<MissionInfo> future;
 
+    public MissionReceivedEvent(){
+        //TODO
+    }
 
-
-
-    @Override
     public MissionInfo getEventInformation() {
         return eventInformation;
     }

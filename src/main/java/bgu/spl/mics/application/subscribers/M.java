@@ -1,7 +1,7 @@
 package bgu.spl.mics.application.subscribers;
 
-import bgu.spl.mics.SimplePublisher;
-import bgu.spl.mics.Subscriber;
+import bgu.spl.mics.*;
+import bgu.spl.mics.application.passiveObjects.MissionInfo;
 
 /**
  * M handles ReadyEvent - fills a report and sends agents to mission.
@@ -10,26 +10,31 @@ import bgu.spl.mics.Subscriber;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class M extends Subscriber {
-	private SimplePublisher mypublisher;
+
 
 	public M() {
-		super("Change_This_Name");
+		super("Change_This_Name");// ?
 		// TODO Implement this
 	}
 
 	@Override
-	protected synchronized void initialize() {// provokes register, defines callback
+	protected synchronized void initialize() {//  defines callback
 		//our callback wait() for the AgentsAvailableEvent we sent to Moneypenny
-		/**
-		 * callback impl:
-		 * 1. Future<T> F = mypublisher.sendEvent( new AgentsAvailableEvent(myEvent.getSerials()) of our relevant serialnumber) AgentsAvailableEvent we send to Moneypenny
-		 * 2. while(Future !isDone){Future.wait()}
-		 * 3. when future is resolved we call GadgetAvailableEvent to Q
-		 * 4. while(Future !isDone){Future.wait()}
-		 * 5. when future is resolved we executed our event and
-		 *
-		 */
-		// TODO Implement this
+		Callback<MissionReceivedEvent> mCall=(MissionReceivedEvent e)->{
+			//asks for the availability of the agents
+			MissionInfo info =e.getEventInformation();
+			AgentAvailableEvent agentAvailableEvent=new AgentAvailableEvent(info.getSerialAgentsNumbers());
+			Future<Boolean> agentAvailFuture = getSimplePublisher().sendEvent(agentAvailableEvent);
+			//asks for the availability of the agents
+			GadgetAvailableEvent gadgetAvailableEvent=new GadgetAvailableEvent(e.getEventInformation().getGadget());
+
+
+
+
+		};
+
+		this.subscribeEvent(MissionReceivedEvent.class,mCall);
+
 		
 	}
 

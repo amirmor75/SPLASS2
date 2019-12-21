@@ -1,20 +1,18 @@
 package bgu.spl.mics;
 
-import bgu.spl.mics.application.passiveObjects.MissionInfo;
+import java.util.List;
 
-public class MissionReceivedEvent implements Event<MissionInfo> {
+public class AgentAvailableEvent implements Event<Boolean> {
+    private List<String> eventInformation;
+    private Future<Boolean> future;
 
+    public AgentAvailableEvent(List<String> serialList){
+        eventInformation=serialList;
+    }
 
-    private MissionInfo eventInformation;
-    private Future<MissionInfo> future;
-
-
-
-
-    @Override
-    public MissionInfo getEventInformation() {
+    public List<String> getEventInformation() {
         return eventInformation;
     }
 
-    public Future<MissionInfo> getFuture(){return future;}
+    public Future<Boolean> getFuture(){return future;}
 }
