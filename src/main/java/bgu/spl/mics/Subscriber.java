@@ -19,7 +19,6 @@ import java.util.Hashtable;
  */
 public abstract class Subscriber extends RunnableSubPub {
 
-    private SimplePublisher publisher;
     private boolean terminated = false;
     /**
      * The abstract Subscriber stores this callback together with the
@@ -33,7 +32,6 @@ public abstract class Subscriber extends RunnableSubPub {
      */
     public Subscriber(String name) {
         super(name);
-        publisher=new SimplePublisher();
     }
 
     /**
@@ -112,24 +110,22 @@ public abstract class Subscriber extends RunnableSubPub {
     /**
      * The entry point of the Subscriber.
      * otherwise you will end up in an infinite loop.
+     *
+     *              * 1. wait() for MB to put Event inside our queue
+     *              * 2. takes message and execute with callback
+     *              * 3. we know already what his callback
      */
     @Override
     public final void run() {
+        Message currentMessage;
         MessageBrokerImpl.getInstance().register(this);
         initialize();
         while (!terminated) {
             try {
-                MessageBrokerImpl.getInstance().awaitMessage(this);
-                //callbacks.call(messages.take()); //the call function should be implemented- Lambdas
+                currentMessage=MessageBrokerImpl.getInstance().awaitMessage(this);
+                callbacks.get(currentMessage.getClass()).call(currentMessage);
             }catch(InterruptedException illegal){ MessageBrokerImpl.getInstance().register(this); }
             MessageBrokerImpl.getInstance().unregister(this);
-
-            /**
-             * this is the message loop,
-             * 1. wait() for MB to put Event inside our queue
-             * 2. takes message and execute with callback
-             * 3. we know already what his callback
-              */
         }
     }
 

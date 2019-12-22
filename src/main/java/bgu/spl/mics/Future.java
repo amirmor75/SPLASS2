@@ -56,11 +56,9 @@ public class Future<T> {
 	 * @post get()=={@param result}
 	 */
 	public synchronized void resolve (T result) {//not safe
-		// amir deleted if(result!= null)
 		this.result = result;
 		isDone.set(true);
-		this.notifyAll();// amir added, need to notify "this" it is awake
-
+		this.notifyAll();
 	}
 
 	/**
@@ -88,7 +86,7 @@ public class Future<T> {
 	 */
 	public T get(long timeout, TimeUnit unit) {
 
-		synchronized(this) {// amir changed to this from result
+		synchronized(this) {
 			if (unit != null) {
 				TimeUnit milliTime=TimeUnit.MILLISECONDS;
 				while (!isDone()) {
