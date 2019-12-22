@@ -13,18 +13,14 @@ import java.util.Map;
 public class Squad {
 
 	private Map<String, Agent> agents;
-	private static Squad instance=null;
+	private static class SingletonHolder {
+		private static Squad instance=new Squad();
+	}
 
 	/**
 	 * Retrieves the single instance of this class.
 	 */
-	public static Squad getInstance() {
-		synchronized (instance) {
-			if (instance == null)
-				instance = new Squad();
-			return instance;
-		}
-	}
+	public static Squad getInstance() { return SingletonHolder.instance;	}
 
 	/**
 	 * Initializes the squad. This method adds all the agents to the squad.

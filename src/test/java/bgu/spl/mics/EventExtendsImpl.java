@@ -6,4 +6,8 @@ public class EventExtendsImpl implements EventExtends {
     public void setFutureResult(String res){ result=res; }
 
 
+    @Override
+    public Future<String> getFuture() {
+        return null;
+    }
 }

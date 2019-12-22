@@ -1,7 +1,6 @@
 package bgu.spl.mics.application.subscribers;
 
-import bgu.spl.mics.SimplePublisher;
-import bgu.spl.mics.Subscriber;
+import bgu.spl.mics.*;
 
 /**
  * M handles ReadyEvent - fills a report and sends agents to mission.
@@ -10,15 +9,24 @@ import bgu.spl.mics.Subscriber;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class M extends Subscriber {
-	private SimplePublisher mypublisher;
+	private  String serialNumber;
 
-	public M() {
-		super("Change_This_Name");
-		// TODO Implement this
+	public M(String num) {
+		super("M");
+		serialNumber=num;
 	}
 
 	@Override
-	protected synchronized void initialize() {// provokes register, defines callback
+	protected synchronized void initialize() {
+
+		//Lambda implementation of call(Event e) function-
+		//				 whatever we want to happen when SomeEvent is received
+//		this.subscribeEvent(MissionReceivedEvent.class, (MissionReceivedEventTask e) ->
+//
+//				());
+
+
+		// provokes register, defines callback
 		//our callback wait() for the AgentsAvailableEvent we sent to Moneypenny
 		/**
 		 * callback impl:
@@ -29,7 +37,6 @@ public class M extends Subscriber {
 		 * 5. when future is resolved we executed our event and
 		 *
 		 */
-		// TODO Implement this
 		
 	}
 

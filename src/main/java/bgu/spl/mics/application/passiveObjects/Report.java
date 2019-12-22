@@ -13,7 +13,7 @@ public class Report {
 	private String missionName;
 	private int m;
 	private int moneypenny;
-	private List<String> agentsSerialNumbersNumber;
+	private List<String> agentsSerialNumbers;
 	private List<String> agentsNames;
 	private String gadgetName;
 	private int qTime;
@@ -67,14 +67,14 @@ public class Report {
 	 * @return The serial numbers of the agents.
 	 */
 	public List<String> getAgentsSerialNumbersNumber() {
-		return agentsSerialNumbersNumber;
+		return agentsSerialNumbers;
 	}
 
 	/**
 	 * Sets the serial numbers of the agents.
 	 */
 	public void setAgentsSerialNumbersNumber(List<String> agentsSerialNumbersNumber) {
-		this.agentsSerialNumbersNumber=agentsSerialNumbersNumber;
+		this.agentsSerialNumbers=agentsSerialNumbersNumber;
 	}
 
 	/**

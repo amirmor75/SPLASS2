@@ -20,7 +20,6 @@ import java.util.List;
  */
 public class Inventory {
 	private List<String> gadgets;
-	private int version=0;
 	private static class SingletonHolder {
 		private static Inventory instance=new Inventory();
 	}
@@ -31,36 +30,6 @@ public class Inventory {
      */
 	public static Inventory getInstance() {
 			return SingletonHolder.instance;
-	}
-
-	private synchronized Iterator<String> iterator(){
-		return new Iterator<String>() { //Anonymous class
-			final int originalVersion = version;
-			int index = 0;
-
-			public boolean hasNext() {
-				//try {
-					if (originalVersion != version) {
-						throw new IllegalStateException("The version has changed");
-					}
-					return index < gadgets.size();
-				//}catch (){
-				//}
-			}
-
-			public String next(){
-				//try{
-					synchronized (this) {
-						if (originalVersion != version)
-							throw new IllegalStateException("The version has changed");
-						String gad = gadgets.get(index);
-						index++;
-						return gad;
-					}
-				//}catch(){
-				//}
-			}
-		};
 	}
 
 	/**
@@ -93,7 +62,6 @@ public class Inventory {
 		boolean isExist=gadgets.contains(gadget);
 		if(isExist) {
 			gadgets.remove(gadget);
-			version++;
 		}
 		return isExist;
 	}
@@ -104,20 +72,18 @@ public class Inventory {
 	 * Prints to a file name @filename a serialized object List<Gadget> which is a
 	 * List of all the gadgets in the diary.
 	 * This method is called by the main method in order to generate the output.
-	 * implemented by optimistic try and fail
+	 * printToFile (for infentory and diary) is called from the main thread (and not from M, Q)
+	 * after termination of all other threads.
 	 */
-	public void printToFile(String filename){
+	public void printToFile(String filename) {
 		Gson gson = new Gson();
-		File file=new File(filename);
-		try{
+		File file = new File(filename);
+		try {
 			FileWriter writer = new FileWriter(file);
-			Iterator<String> gad=iterator();
-			while(gad.hasNext()){
+			Iterator<String> gad = gadgets.iterator();
+			while (gad.hasNext()) {
 				gson.toJson(gad.next(), writer);
 			}
-		}catch(Exception e){
-			file.delete();
-			printToFile(filename);
-		}
+		}catch (Exception ignore){}
 	}
 }
