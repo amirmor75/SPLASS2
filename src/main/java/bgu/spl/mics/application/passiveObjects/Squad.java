@@ -11,7 +11,7 @@ import java.util.Map;
  * You may add ONLY private fields and methods to this class.
  */
 public class Squad {
-
+  
 	private Map<String, Agent> agentMap;//serial number is the key
 
 	private static class SingletonHolder {
@@ -22,9 +22,11 @@ public class Squad {
 	 * Retrieves the single instance of this class.
 	 */
 
+
 	public static Squad getInstance() {
 		return SingletonHolder.instance;
 	}
+
 
 	/**
 	 * Initializes the squad. This method adds all the agents to the squad.

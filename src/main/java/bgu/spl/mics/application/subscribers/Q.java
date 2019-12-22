@@ -1,6 +1,6 @@
 package bgu.spl.mics.application.subscribers;
 
-import bgu.spl.mics.Subscriber;
+import bgu.spl.mics.*;
 
 /**
  * Q is the only Subscriber\Publisher that has access to the {@link bgu.spl.mics.application.passiveObjects.Inventory}.
@@ -11,12 +11,16 @@ import bgu.spl.mics.Subscriber;
 public class Q extends Subscriber {
 
 	public Q() {
-		super("Change_This_Name");
+		super("Q");
 		// TODO Implement this
 	}
 
 	@Override
 	protected void initialize() {
+//		this.subscribeEvent(GadgetAvailableEvent.class, (GadgetAvailableEventTask e) ->
+//				(/* implementatoin  of call(Event e) function-
+//				 whatever we want to happen when SomeEvent is received*/));
+
 		// TODO Implement this
 		
 	}

@@ -2,8 +2,14 @@ package bgu.spl.mics;
 
 
 import java.util.Hashtable;
+
+
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The {@link MessageBrokerImpl class is the implementation of the MessageBroker interface.
@@ -19,20 +25,27 @@ public class MessageBrokerImpl implements MessageBroker {
 	 * Hashtable is a synchronized data structure in JAVA
 	 * for every subscriber-Key, will be a blockingQueue of Events
 	 */
+
 	private Hashtable< Subscriber , LinkedBlockingQueue<Message> > subscribers=new Hashtable<>();
 	private Hashtable< Class<? extends Event> , LinkedBlockingQueue<Subscriber>> eventSubscriberMap=new Hashtable<>();
 	private Hashtable< Class<? extends Broadcast> , LinkedBlockingQueue<Subscriber>> broadcastSubscriberMap=new Hashtable<>();
 	private Hashtable<Event,Future> futureMap=new Hashtable<>();
 
+
+
 	/**
 	 * Retrieves the single instance of this class.
 	 */
+
 
 	public static MessageBroker getInstance() {//safe
 		return SingletonHolder.instance;
 	}
 
+
+
 	@Override
+
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {//safe
 		eventSubscriberMap.get(type).add(m);
 	}
@@ -55,10 +68,15 @@ public class MessageBrokerImpl implements MessageBroker {
 				subscribers.get(s).put(b);
 			}
 		}catch (InterruptedException ignore){}
+
 	}
 
-	
+	/**impl:
+	 * 1.pushes e to a relevant queue.
+	 * 2. return Future<T>=new Future();
+	 */
 	@Override
+
 	public <T> Future<T> sendEvent(Event<T> e) {//safe
 		try {
 			LinkedBlockingQueue<Subscriber> subsToType = eventSubscriberMap.get(e.getClass());
@@ -69,6 +87,7 @@ public class MessageBrokerImpl implements MessageBroker {
 		Future<T> future=new Future<>();
 		futureMap.put(e,future);
 		return future;
+
 	}
 
 	/**
@@ -80,8 +99,9 @@ public class MessageBrokerImpl implements MessageBroker {
 		subscribers.putIfAbsent(m, mQueue);
 	}
 
+
 	@Override
-	public void unregister(Subscriber m) {//not really safe
+	public void unregister(Subscriber m) {//not really safe (safe with synchronized (this) )
 		synchronized (this) {//because deleting is not safe for the use of other threads
 			Set<Class<? extends Event>> Ekeys = eventSubscriberMap.keySet();
 			for (Class<? extends Event> key : Ekeys) {

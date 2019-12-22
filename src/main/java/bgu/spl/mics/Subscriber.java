@@ -110,24 +110,24 @@ public abstract class Subscriber extends RunnableSubPub {
     /**
      * The entry point of the Subscriber.
      * otherwise you will end up in an infinite loop.
+     *
+     *              * 1. wait() for MB to put Event inside our queue
+     *              * 2. takes message and execute with callback
+     *              * 3. we know already what his callback
      */
     @Override
     public final void run() {
+        Message currentMessage;
         MessageBrokerImpl.getInstance().register(this);
         initialize();
         while (!terminated) {//!terminated is given
             try {
+
                 Message m=MessageBrokerImpl.getInstance().awaitMessage(this);
                 callbacks.get(m.getClass()).call(m);
             }catch(InterruptedException illegal){ MessageBrokerImpl.getInstance().register(this); }//????
-            MessageBrokerImpl.getInstance().unregister(this);
 
-            /**
-             * this is the message loop,
-             * 1. wait() for MB to put Event inside our queue
-             * 2. takes message and execute with callback
-             * 3. we know already what his callback
-              */
+            MessageBrokerImpl.getInstance().unregister(this);
         }
     }
 

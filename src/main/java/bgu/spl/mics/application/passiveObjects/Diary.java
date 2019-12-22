@@ -18,7 +18,6 @@ import java.util.List;
  */
 public class Diary {
 	private List<Report> reports;
-	private int version=0;
 	private int total=0;
 	private static class SingletonHolder {
 		private static Diary instance = new Diary();
@@ -58,7 +57,7 @@ public class Diary {
 		File file=new File(filename);
 		try{
 			FileWriter writer = new FileWriter(file);
-			Iterator<Report> reportIterator=iterator();
+			Iterator<Report> reportIterator=reports.iterator();
 			while(reportIterator.hasNext()){
 				Report currentRep=reportIterator.next();
 				String missionName=currentRep.getMissionName();
@@ -68,30 +67,7 @@ public class Diary {
 				gson.toJson(info,writer);
 			}
 			gson.toJson("number of missions:"+total,writer);
-		}catch(Exception e){
-			file.delete();
-			printToFile(filename);
-		}
-	}
-	private synchronized Iterator<Report> iterator(){
-		return new Iterator<Report>() { //Anonymous class
-			final int originalVersion = version;
-			int index = 0;
-
-			public boolean hasNext() {
-				return index < reports.size();
-			}
-
-			public Report next(){
-				synchronized (this) {
-					if (originalVersion != version)
-						throw new IllegalStateException("The version has changed");
-					Report report = reports.get(index);
-					index++;
-					return report;
-				}
-			}
-		};
+		}catch(Exception ignored){}
 	}
 
 	/**

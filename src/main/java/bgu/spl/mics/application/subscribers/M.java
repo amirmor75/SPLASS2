@@ -1,7 +1,9 @@
 package bgu.spl.mics.application.subscribers;
 
 import bgu.spl.mics.*;
+
 import bgu.spl.mics.application.passiveObjects.MissionInfo;
+
 
 /**
  * M handles ReadyEvent - fills a report and sends agents to mission.
@@ -12,6 +14,7 @@ import bgu.spl.mics.application.passiveObjects.MissionInfo;
 public class M extends Subscriber {
 
 
+
 	public M() {
 		super("Change_This_Name");// ?
 		// TODO Implement this
@@ -19,6 +22,7 @@ public class M extends Subscriber {
 
 	@Override
 	protected synchronized void initialize() {//  defines callback
+    
 		//our callback wait() for the AgentsAvailableEvent we sent to Moneypenny
 		Callback<MissionReceivedEvent> mCall=(MissionReceivedEvent e)->{
 			//asks for the availability of the agents
@@ -27,15 +31,23 @@ public class M extends Subscriber {
 			Future<Boolean> agentAvailFuture = getSimplePublisher().sendEvent(agentAvailableEvent);
 			//asks for the availability of the agents
 			GadgetAvailableEvent gadgetAvailableEvent=new GadgetAvailableEvent(e.getEventInformation().getGadget());
-
-
-
-
+      
+      //hhaaayyyyddddeeeeee
 		};
 
 		this.subscribeEvent(MissionReceivedEvent.class,mCall);
 
-		
+  }
+  
+	private  String serialNumber;
+
+	public M(String num) {
+		super("M");
+		serialNumber=num;
 	}
+
+	
+		
+	
 
 }
