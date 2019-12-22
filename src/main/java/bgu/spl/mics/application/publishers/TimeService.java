@@ -1,6 +1,9 @@
 package bgu.spl.mics.application.publishers;
 
+import bgu.spl.mics.MessageBrokerImpl;
 import bgu.spl.mics.Publisher;
+import bgu.spl.mics.TimeBroadCast;
+import bgu.spl.mics.application.passiveObjects.Inventory;
 
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
@@ -8,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * TimeService is the global system timer There is only one instance of this Publisher.
  * It keeps track of the amount of ticks passed since initialization and notifies
- * all other subscribers about the current time tick using {@link Tick Broadcast}.
+ * all other subscribers about the current time tick using {@link TimeBroadCast Broadcast}.
  * This class may not hold references for objects which it is not responsible for.
  * 
  * You can add private fields and public methods to this class.
@@ -17,24 +20,18 @@ import java.util.concurrent.TimeUnit;
 public class TimeService extends Publisher {
 
 	/**
-	 * create only one instance of this class
-	 */
-	private int numOfInstances=0;
-	/**
 	 *  the number of ticks before termination
 	 *  time-tick is 100 milliseconds
 	 */
 	private int duration;
-	/**
-	 * Timer for measuring the time-ticks
-	 */
-	private Timer timer;
+	private int currentDuration;
 
-	private TimeService() {
+
+	public TimeService() {
 		super("TimeService");
 	}
 
-	private TimeService(int duration){
+	public TimeService(int duration){
 		super("TimeService");
 		this.duration=duration;
 	}
@@ -42,12 +39,28 @@ public class TimeService extends Publisher {
 	@Override
 	protected void initialize() {
 		// TODO Implement this
-		
 	}
 
 	@Override
 	public void run() {
-		// TODO Implement this
+		while(true) {
+			try {
+				Thread.sleep(100);
+				if(currentDuration<duration)
+					MessageBrokerImpl.getInstance().sendBroadcast(new TimeBroadCast(currentDuration));
+				currentDuration = currentDuration + 1;
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+
+	public int getCurrentDuration(){
+		return currentDuration;
+	}
 }

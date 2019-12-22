@@ -8,8 +8,8 @@ public class MissionReceivedEvent implements Event<MissionInfo> {
     private MissionInfo eventInformation;
     private Future<MissionInfo> future;
 
-    public MissionReceivedEvent(){
-        //TODO
+    public MissionReceivedEvent(MissionInfo info){
+        eventInformation=info;
     }
 
     public MissionInfo getEventInformation() {

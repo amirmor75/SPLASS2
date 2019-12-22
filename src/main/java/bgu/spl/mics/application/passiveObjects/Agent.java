@@ -58,7 +58,7 @@ public class Agent {
 	/**
 	 * Acquires an agent.
 	 */
-	public void acquire(){// not sure at all, changed Tal's version
+	public void acquire(){
 		boolean localAva;
 		do{
 			localAva=available.get();
@@ -69,6 +69,9 @@ public class Agent {
 	 * Releases an agent.
 	 */
 	public void release(){
-		available.compareAndSet(false,true);
+		boolean localAva;
+		do{
+			localAva=available.get();
+		}while(!available.compareAndSet(localAva,true));
 	}
 }

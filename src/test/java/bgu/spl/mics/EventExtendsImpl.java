@@ -5,9 +5,4 @@ public class EventExtendsImpl implements EventExtends {
     public String getFutureResult(){ return result; }
     public void setFutureResult(String res){ result=res; }
 
-
-    @Override
-    public Future<String> getFuture() {
-        return null;
-    }
 }

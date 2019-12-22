@@ -72,7 +72,7 @@ public class Inventory {
 	 * Prints to a file name @filename a serialized object List<Gadget> which is a
 	 * List of all the gadgets in the diary.
 	 * This method is called by the main method in order to generate the output.
-	 * printToFile (for infentory and diary) is called from the main thread (and not from M, Q)
+	 * printToFile (for inventory and diary) is called from the main thread (and not from M, Q)
 	 * after termination of all other threads.
 	 */
 	public void printToFile(String filename) {

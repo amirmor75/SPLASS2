@@ -21,8 +21,6 @@ public class Squad {
 	/**
 	 * Retrieves the single instance of this class.
 	 */
-
-
 	public static Squad getInstance() {
 		return SingletonHolder.instance;
 	}
@@ -51,10 +49,11 @@ public class Squad {
 
 	/**
 	 * simulates executing a mission by calling sleep.
-	 * @param time   milliseconds to sleep
+	 * @param time   time-ticks to sleep
 	 */
+	//get jkjj
 	public synchronized void sendAgents(List<String> serials, int time){
-		try {Thread.sleep(time);} catch (InterruptedException ignored) {}
+		try {Thread.sleep(time/100);} catch (InterruptedException ignored) {}
 		releaseAgents(serials);
 	}
 
@@ -64,7 +63,9 @@ public class Squad {
 	 * @param agent an Agent from the map
 	 */
 	private synchronized void acquireAgent(Agent agent){
-		// synchronized agent is not good.. 
+		// synchronized agent is not good..
+		// synchronized this is the worst
+		// doubt synchronized(agent)
 		while (!agent.isAvailable()) {
 			try {
 				agent.wait();

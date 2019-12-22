@@ -13,12 +13,17 @@ import bgu.spl.mics.application.passiveObjects.MissionInfo;
  */
 public class M extends Subscriber {
 
-
+	private  String serialNumber;
 
 	public M() {
-		super("Change_This_Name");// ?
-		// TODO Implement this
+		super("M");
 	}
+
+	public M(String num) {
+		super("M");
+		serialNumber=num;
+	}
+
 
 	@Override
 	protected synchronized void initialize() {//  defines callback
@@ -39,12 +44,6 @@ public class M extends Subscriber {
 
   }
   
-	private  String serialNumber;
-
-	public M(String num) {
-		super("M");
-		serialNumber=num;
-	}
 
 	
 		

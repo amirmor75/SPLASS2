@@ -52,12 +52,12 @@ public class MissionInfo {
 	public String getGadget() {return gadget;}
 
     /**
-     * Sets the time the mission was issued in milliseconds.
+     * Sets the time the mission was issued in time-ticks.
      */
     public void setTimeIssued(int timeIssued) {this.timeIssued=timeIssued;}
 
 	/**
-     * Retrieves the time the mission was issued in milliseconds.
+     * Retrieves the time the mission was issued in time-ticks.
      */
 	public int getTimeIssued() {return timeIssued;}
 
