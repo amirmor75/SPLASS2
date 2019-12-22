@@ -61,17 +61,17 @@ public class Squad {
 	 * when the agent available- He will be acquired to new mission
 	 * @param agent an Agent from the map
 	 */
-	private void acquireAgent(Agent agent){// to fix
-		synchronized (this) {// not good at all
-			while (!agent.isAvailable()) {
-				try {
-					agent.wait();
-				} catch (InterruptedException ignored) { }
-			}
-			agent.acquire();
-			agent.notifyAll();// not good 
+	private synchronized void acquireAgent(Agent agent){
+		// synchronized agent is not good.. 
+		while (!agent.isAvailable()) {
+			try {
+				agent.wait();
+			} catch (InterruptedException ignored) { }
 		}
+		agent.acquire();
+		agent.notifyAll();
 	}
+
 
 	/**
 	 * acquires an agent, i.e. holds the agent until the caller is done with it
