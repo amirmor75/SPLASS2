@@ -58,8 +58,11 @@ public class Agent {
 	/**
 	 * Acquires an agent.
 	 */
-	public void acquire(){
-		available.compareAndSet(true,false);
+	public void acquire(){// not sure at all, changed Tal's version
+		boolean localAva;
+		do{
+			localAva=available.get();
+		}while(!available.compareAndSet(localAva,false));
 	}
 
 	/**
