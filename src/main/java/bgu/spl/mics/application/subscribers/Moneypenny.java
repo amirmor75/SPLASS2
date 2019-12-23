@@ -17,10 +17,17 @@ import java.util.List;
  */
 public class Moneypenny extends Subscriber {
 
+	private  int serialNumber;
+
 	public Moneypenny() {
-		super("Change_This_Name");
-		// TODO Implement this
+		super("Moneypenny");
 	}
+
+	public Moneypenny(int num) {
+		super("Moneypenny");
+		serialNumber=num;
+	}
+
 
 	@Override
 	protected void initialize() {

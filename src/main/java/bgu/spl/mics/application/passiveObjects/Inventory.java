@@ -2,6 +2,9 @@ package bgu.spl.mics.application.passiveObjects;
 
 import com.google.gson.Gson;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -13,7 +16,7 @@ import java.util.List;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Inventory {
-	private List<String> gadgets;
+	private List<String> gadgets=new LinkedList<>();
 
 	private static class SingletonHolder {
 		private static Inventory instance=new Inventory();
@@ -71,10 +74,10 @@ public class Inventory {
 	 * after termination of all other threads.
 	 */
 	public void printToFile(String filename) {
-		Gson gson = new Gson();
-		try {
-			gson.toJson(gadgets,new FileWriter(filename));
-		}catch (Exception ignore){}
+		try (Writer writer = new FileWriter(filename)) {
+			Gson gson = new Gson();
+			gson.toJson(gadgets, writer);
+		} catch (IOException ignored) {
+		}
 	}
-
 }

@@ -38,10 +38,8 @@ public class InputJsonDefinition {
         this.inventory = inventory;
     }
 
-    private class Services {
+    public class Services {
         private int M;
-
-
         private int Moneypenny;
         private List<Intelligence> intelligence;
         private int time;

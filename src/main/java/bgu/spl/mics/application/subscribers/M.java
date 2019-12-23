@@ -13,13 +13,13 @@ import bgu.spl.mics.application.passiveObjects.MissionInfo;
  */
 public class M extends Subscriber {
 
-	private  String serialNumber;
+	private  int serialNumber;
 
 	public M() {
 		super("M");
 	}
 
-	public M(String num) {
+	public M(int num) {
 		super("M");
 		serialNumber=num;
 	}
@@ -34,10 +34,10 @@ public class M extends Subscriber {
 			MissionInfo info =e.getEventInformation();
 			AgentAvailableEvent agentAvailableEvent=new AgentAvailableEvent(info.getSerialAgentsNumbers());
 			Future<Boolean> agentAvailFuture = getSimplePublisher().sendEvent(agentAvailableEvent);
-			//asks for the availability of the agents
+			//asks for the availability of gadgets
 			GadgetAvailableEvent gadgetAvailableEvent=new GadgetAvailableEvent(e.getEventInformation().getGadget());
       
-      //hhaaayyyyddddeeeeee
+      
 		};
 
 		this.subscribeEvent(MissionReceivedEvent.class,mCall);

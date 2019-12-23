@@ -2,8 +2,12 @@ package bgu.spl.mics.application.passiveObjects;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -15,7 +19,7 @@ import java.util.List;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Diary {
-	private List<Report> reports;
+	private List<Report> reports=new LinkedList<>();
 	private int total=0;
 
 	private static class SingletonHolder {
@@ -51,27 +55,11 @@ public class Diary {
 	 * List of all the reports in the diary.
 	 * This method is called by the main method in order to generate the output.
 	 */
-	public void printToFile(String filename){
-		Gson gson = new Gson();
-		try {
-			gson.toJson(this,new FileWriter(filename));
-		}catch (Exception ignore){}
-
-//		Gson gson = new Gson();
-//		File file=new File(filename);
-//		try{
-//			FileWriter writer = new FileWriter(file);
-//			Iterator<Report> reportIterator=reports.iterator();
-//			while(reportIterator.hasNext()){
-//				Report currentRep=reportIterator.next();
-//				String missionName=currentRep.getMissionName();
-//				int timeCreated=currentRep.getTimeCreated();
-//				int M=currentRep.getM();
-//				String info= String.format("missionName: %s, timeCreated: %s,M: %s",missionName,timeCreated,M);
-//				gson.toJson(info,writer);
-//			}
-//			gson.toJson("number of missions:"+total,writer);
-//		}catch(Exception ignored){}
+	public void printToFile(String filename){ //need to printed pretty format
+		try (Writer writer = new FileWriter(filename)) {
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			gson.toJson(this, writer);
+		} catch (IOException ignored) { }
 	}
 
 	/**

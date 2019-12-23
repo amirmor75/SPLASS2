@@ -17,6 +17,10 @@ public class Intelligence extends Subscriber {
 
 	private List<MissionInfo> missions;
 
+	public List<MissionInfo> getMissions(){
+		return missions;
+	}
+
 	public Intelligence() {
 		super("Intelligence");
 		missions=new LinkedList<>();

@@ -1,8 +1,5 @@
 package bgu.spl.mics.application.passiveObjects;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Passive data-object representing a information about an agent in MI6.
@@ -12,7 +9,7 @@ import java.util.Map;
  */
 public class Squad {
   
-	private Map<String, Agent> agentMap;//serial number is the key
+	private Map<String, Agent> agentMap=new Hashtable<>();//serial number is the key
 
 	private static class SingletonHolder {
 		private static Squad instance=new Squad();
