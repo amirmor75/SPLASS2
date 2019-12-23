@@ -43,11 +43,10 @@ public class TimeService extends Publisher {
 
 	@Override
 	public void run() {
-		while(true) {
+		while(currentDuration<duration) {
 			try {
 				Thread.sleep(100);
-				if(currentDuration<duration)
-					MessageBrokerImpl.getInstance().sendBroadcast(new TimeBroadCast(currentDuration));
+				MessageBrokerImpl.getInstance().sendBroadcast(new TimeBroadCast(currentDuration));
 				currentDuration = currentDuration + 1;
 			} catch (InterruptedException e) {
 				e.printStackTrace();

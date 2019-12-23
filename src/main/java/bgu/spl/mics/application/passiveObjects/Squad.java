@@ -35,7 +35,6 @@ public class Squad {
 	public synchronized void load (Agent[] agents) {
 		for (Agent agent: agents)
 			agentMap.put(agent.getSerialNumber(),agent);
-
 	}
 
 	/**
@@ -51,7 +50,7 @@ public class Squad {
 	 * simulates executing a mission by calling sleep.
 	 * @param time   time-ticks to sleep
 	 */
-	//get jkjj
+	//not sure about this implementation
 	public synchronized void sendAgents(List<String> serials, int time){
 		try {Thread.sleep(time/100);} catch (InterruptedException ignored) {}
 		releaseAgents(serials);

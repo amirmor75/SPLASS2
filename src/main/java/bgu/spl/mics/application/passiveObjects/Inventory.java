@@ -1,13 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
 
-
-
-
 import com.google.gson.Gson;
-
-import java.io.File;
 import java.io.FileWriter;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -20,6 +14,7 @@ import java.util.List;
  */
 public class Inventory {
 	private List<String> gadgets;
+
 	private static class SingletonHolder {
 		private static Inventory instance=new Inventory();
 	}
@@ -77,13 +72,9 @@ public class Inventory {
 	 */
 	public void printToFile(String filename) {
 		Gson gson = new Gson();
-		File file = new File(filename);
 		try {
-			FileWriter writer = new FileWriter(file);
-			Iterator<String> gad = gadgets.iterator();
-			while (gad.hasNext()) {
-				gson.toJson(gad.next(), writer);
-			}
+			gson.toJson(gadgets,new FileWriter(filename));
 		}catch (Exception ignore){}
 	}
+
 }

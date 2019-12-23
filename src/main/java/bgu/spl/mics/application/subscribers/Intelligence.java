@@ -15,7 +15,6 @@ import java.util.List;
  */
 public class Intelligence extends Subscriber {
 
-	private int currentDuration;
 	private List<MissionInfo> missions;
 
 	public Intelligence() {
@@ -31,12 +30,11 @@ public class Intelligence extends Subscriber {
 	@Override
 	protected void initialize() {
 		Callback<TimeBroadCast> intelligenceCall=(TimeBroadCast timeDuration)->{
-			currentDuration=timeDuration.getCurrentDuration();
 			List<MissionInfo> forDeletion=new LinkedList<>();
 			for(MissionInfo mission:missions) {
-				if(currentDuration>mission.getTimeExpired()) //if the time expired then the mission it won’t be executed at all.
+				if(timeDuration.getCurrentDuration()>mission.getTimeExpired()) //if the time expired then the mission it won’t be executed at all.
 					forDeletion.add(mission);
-				else if (mission.getTimeIssued() == currentDuration)
+				else if (mission.getTimeIssued() == timeDuration.getCurrentDuration())
 					getSimplePublisher().sendEvent(new MissionReceivedEvent(mission));
 			}
 			missions.removeAll(forDeletion);

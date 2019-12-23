@@ -3,9 +3,7 @@ package bgu.spl.mics.application.passiveObjects;
 
 import com.google.gson.Gson;
 
-import java.io.File;
 import java.io.FileWriter;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -19,6 +17,7 @@ import java.util.List;
 public class Diary {
 	private List<Report> reports;
 	private int total=0;
+
 	private static class SingletonHolder {
 		private static Diary instance = new Diary();
 	}
@@ -54,20 +53,25 @@ public class Diary {
 	 */
 	public void printToFile(String filename){
 		Gson gson = new Gson();
-		File file=new File(filename);
-		try{
-			FileWriter writer = new FileWriter(file);
-			Iterator<Report> reportIterator=reports.iterator();
-			while(reportIterator.hasNext()){
-				Report currentRep=reportIterator.next();
-				String missionName=currentRep.getMissionName();
-				int timeCreated=currentRep.getTimeCreated();
-				int M=currentRep.getM();
-				String info= String.format("missionName: %s, timeCreated: %s,M: %s",missionName,timeCreated,M);
-				gson.toJson(info,writer);
-			}
-			gson.toJson("number of missions:"+total,writer);
-		}catch(Exception ignored){}
+		try {
+			gson.toJson(this,new FileWriter(filename));
+		}catch (Exception ignore){}
+
+//		Gson gson = new Gson();
+//		File file=new File(filename);
+//		try{
+//			FileWriter writer = new FileWriter(file);
+//			Iterator<Report> reportIterator=reports.iterator();
+//			while(reportIterator.hasNext()){
+//				Report currentRep=reportIterator.next();
+//				String missionName=currentRep.getMissionName();
+//				int timeCreated=currentRep.getTimeCreated();
+//				int M=currentRep.getM();
+//				String info= String.format("missionName: %s, timeCreated: %s,M: %s",missionName,timeCreated,M);
+//				gson.toJson(info,writer);
+//			}
+//			gson.toJson("number of missions:"+total,writer);
+//		}catch(Exception ignored){}
 	}
 
 	/**
