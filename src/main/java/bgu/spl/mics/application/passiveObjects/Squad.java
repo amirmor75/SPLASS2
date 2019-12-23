@@ -45,32 +45,12 @@ public class Squad {
 
 	/**
 	 * simulates executing a mission by calling sleep.
-	 * @param time   time-ticks to sleep
+	 * @param time   milliseconds to sleep to sleep
 	 */
-	//not sure about this implementation
 	public synchronized void sendAgents(List<String> serials, int time){
-		try {Thread.sleep(time/100);} catch (InterruptedException ignored) {}
+		try {Thread.sleep(time);} catch (InterruptedException ignored) {}
 		releaseAgents(serials);
 	}
-
-	/**
-	 * this is a blocking method- it wait until the agent is available for new mission
-	 * when the agent available- He will be acquired to new mission
-	 * @param agent an Agent from the map
-	 */
-	private synchronized void acquireAgent(Agent agent){
-		// synchronized agent is not good..
-		// synchronized this is the worst
-		// doubt synchronized(agent)
-		while (!agent.isAvailable()) {
-			try {
-				agent.wait();
-			} catch (InterruptedException ignored) { }
-		}
-		agent.acquire();
-		agent.notifyAll();
-	}
-
 
 	/**
 	 * acquires an agent, i.e. holds the agent until the caller is done with it
@@ -84,7 +64,14 @@ public class Squad {
 				return false;
 			}
 			else{
-				acquireAgent(agentMap.get(s));
+				Agent agent=agentMap.get(s);
+				while (!agent.isAvailable()) {
+					try {
+						agent.wait();
+					} catch (InterruptedException ignored) { }
+				}
+				agent.acquire();
+				agent.notifyAll();
 			}
 		}
 		return true;
@@ -95,7 +82,7 @@ public class Squad {
      * @param serials the serial numbers of the agents
      * @return a list of the names of the agents with the specified serials.
      */
-    public List<String> getAgentsNames(List<String> serials){
+    public synchronized List<String> getAgentsNames(List<String> serials){
         List<String> names=new LinkedList<>();
         Iterator<String> serial=serials.iterator();
         Agent agent;

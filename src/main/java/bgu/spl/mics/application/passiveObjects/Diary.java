@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Passive object representing the diary where all reports are stored.
@@ -19,13 +21,12 @@ import java.util.List;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Diary {
-	private List<Report> reports=new LinkedList<>();
-	private int total=0;
+	private AtomicReference<List<Report>> reports=new AtomicReference<>(new LinkedList<>());
+	private AtomicInteger total=new AtomicInteger(0);
 
 	private static class SingletonHolder {
 		private static Diary instance = new Diary();
 	}
-
 
 	/**
 	 * Retrieves the single instance of this class.
@@ -35,21 +36,28 @@ public class Diary {
 	}
 
 	public List<Report> getReports() {
-		return reports;
+		return reports.get();
 	}
 
 	/**
 	 * adds a report to the diary
 	 * @param reportToAdd - the report to add
 	 */
-	public void addReport(Report reportToAdd){//not elegant, need to be atomic!!!!!
-		synchronized (this){
-			reports.add(reportToAdd);
-		}
+	public void addReport(Report reportToAdd){
+		List<Report> reps;
+		List<Report> newReports=reports.get();
+		newReports.add(reportToAdd);
+		do{
+			reps=reports.get();
+		}while(!reports.compareAndSet(reps,newReports));
+
+		int oldTotal;
+		do{
+			oldTotal=total.get();
+		}while(!total.compareAndSet(oldTotal,oldTotal+1));
 	}
 
 	/**
-	 *
 	 * <p>
 	 * Prints to a file name @filename a serialized object List<Report> which is a
 	 * List of all the reports in the diary.
@@ -67,6 +75,6 @@ public class Diary {
 	 * @return the total number of received missions (executed / aborted) be all the M-instances.
 	 */
 	public int getTotal(){
-		return total;
+		return total.get();
 	}
 }

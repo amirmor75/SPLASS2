@@ -1,10 +1,9 @@
 package bgu.spl.mics;
 
-public class GadgetAvailableEvent implements Event<String> {
-
+public class GadgetAvailableEvent implements Event<Boolean> {
 
     private String eventInformation;
-    private Future<String> future;
+    private Future<Boolean> future;
 
     public GadgetAvailableEvent(String gadget){
         eventInformation=gadget;
@@ -14,5 +13,5 @@ public class GadgetAvailableEvent implements Event<String> {
         return eventInformation;
     }
 
-    public Future<String> getFuture(){return future;}
+    public Future<Boolean> getFuture(){return future;}
 }

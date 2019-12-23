@@ -31,14 +31,12 @@ public class Moneypenny extends Subscriber {
 
 	@Override
 	protected void initialize() {
-
 		Callback<AgentAvailableEvent> agentavailable=(AgentAvailableEvent e)->{
 			List<String> serials= e.getEventInformation();//requested agents
 			boolean availToMe=Squad.getInstance().getAgents(serials);//checks if the agents available and returns true if so
 			MessageBrokerImpl.getInstance().complete(e,availToMe);//resolves the event
 		};
 		this.subscribeEvent(AgentAvailableEvent.class,agentavailable);
-
 	}
 
 }
