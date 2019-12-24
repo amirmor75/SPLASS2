@@ -4,12 +4,9 @@ package bgu.spl.mics;
 import java.util.Hashtable;
 
 
-import java.util.Iterator;
-import java.util.LinkedList;
-
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicReference;
+
 
 /**
  * The {@link MessageBrokerImpl class is the implementation of the MessageBroker interface.
@@ -45,13 +42,16 @@ public class MessageBrokerImpl implements MessageBroker {
 
 
 	@Override
-
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {//safe
+		if(eventSubscriberMap.get(type)==null)
+			eventSubscriberMap.putIfAbsent(type,new LinkedBlockingQueue<>());
 		eventSubscriberMap.get(type).add(m);
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber m) {//safe
+		if(broadcastSubscriberMap.get(type)==null)
+			broadcastSubscriberMap.putIfAbsent(type,new LinkedBlockingQueue<>());
 		broadcastSubscriberMap.get(type).add(m);
 	}
 
@@ -61,14 +61,17 @@ public class MessageBrokerImpl implements MessageBroker {
 	}
 
 	@Override
-	public void sendBroadcast(Broadcast b) {//safe
+	public void sendBroadcast(Broadcast b) {
 		try {
 			LinkedBlockingQueue<Subscriber> callTo = broadcastSubscriberMap.get(b.getClass());
-			for (Subscriber s : callTo) {
-				subscribers.get(s).put(b);
+			if(callTo!=null) {
+				for (Subscriber s : callTo) {
+					if (subscribers.get(s) == null)
+						subscribers.putIfAbsent(s, new LinkedBlockingQueue<>());
+					subscribers.get(s).put(b);
+				}
 			}
-		}catch (InterruptedException ignore){}
-
+		} catch (InterruptedException ignore){}
 	}
 
 	/**impl:
@@ -80,9 +83,11 @@ public class MessageBrokerImpl implements MessageBroker {
 	public <T> Future<T> sendEvent(Event<T> e) {//safe
 		try {
 			LinkedBlockingQueue<Subscriber> subsToType = eventSubscriberMap.get(e.getClass());
-			Subscriber roundRobined=subsToType.take();
-			subscribers.get(roundRobined).put(e);
-			subsToType.put(roundRobined);
+			if (subsToType != null) {
+				Subscriber roundRobined = subsToType.take();
+				subscribers.get(roundRobined).put(e);
+				subsToType.put(roundRobined);
+			}
 		}catch (InterruptedException ignored){}
 		Future<T> future=new Future<>();
 		futureMap.put(e,future);

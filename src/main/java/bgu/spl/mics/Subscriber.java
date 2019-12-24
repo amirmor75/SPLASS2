@@ -32,6 +32,7 @@ public abstract class Subscriber extends RunnableSubPub {
      */
     public Subscriber(String name) {
         super(name);
+        callbacks=new Hashtable<>();
     }
 
     /**

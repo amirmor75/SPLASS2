@@ -47,13 +47,13 @@ public class TimeService extends Publisher {
 		while(currentDuration<duration) {
 			try {
 				Thread.sleep(100);
-				MessageBrokerImpl.getInstance().sendBroadcast(new TimeBroadCast(currentDuration));
+				getSimplePublisher().sendBroadcast(new TimeBroadCast(currentDuration));
 				currentDuration = currentDuration + 1;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		MessageBrokerImpl.getInstance().sendBroadcast(new TerminationBroadCast());
+		getSimplePublisher().sendBroadcast(new TerminationBroadCast());
 	}
 
 	public void setDuration(int duration) {
