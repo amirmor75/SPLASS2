@@ -123,10 +123,9 @@ public abstract class Subscriber extends RunnableSubPub {
             try {
                 Message m=MessageBrokerImpl.getInstance().awaitMessage(this);
                 callbacks.get(m.getClass()).call(m);
-            }catch(InterruptedException illegal){ MessageBrokerImpl.getInstance().register(this); }//??????
-
-            MessageBrokerImpl.getInstance().unregister(this);
+            }catch(InterruptedException illegal){ MessageBrokerImpl.getInstance().register(this); }
         }
+        MessageBrokerImpl.getInstance().unregister(this);
     }
 
 }

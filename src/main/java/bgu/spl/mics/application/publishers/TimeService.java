@@ -2,6 +2,7 @@ package bgu.spl.mics.application.publishers;
 
 import bgu.spl.mics.MessageBrokerImpl;
 import bgu.spl.mics.Publisher;
+import bgu.spl.mics.TerminationBroadCast;
 import bgu.spl.mics.TimeBroadCast;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 
@@ -52,8 +53,8 @@ public class TimeService extends Publisher {
 				e.printStackTrace();
 			}
 		}
+		MessageBrokerImpl.getInstance().sendBroadcast(new TerminationBroadCast());
 	}
-
 
 	public void setDuration(int duration) {
 		this.duration = duration;
@@ -62,4 +63,5 @@ public class TimeService extends Publisher {
 	public int getCurrentDuration(){
 		return currentDuration;
 	}
+
 }

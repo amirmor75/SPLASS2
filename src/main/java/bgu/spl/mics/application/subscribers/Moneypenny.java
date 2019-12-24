@@ -1,9 +1,6 @@
 package bgu.spl.mics.application.subscribers;
 
-import bgu.spl.mics.AgentAvailableEvent;
-import bgu.spl.mics.Callback;
-import bgu.spl.mics.MessageBrokerImpl;
-import bgu.spl.mics.Subscriber;
+import bgu.spl.mics.*;
 import bgu.spl.mics.application.passiveObjects.Squad;
 
 import java.util.List;
@@ -28,15 +25,42 @@ public class Moneypenny extends Subscriber {
 		serialNumber=num;
 	}
 
-
-	@Override
-	protected void initialize() {
-		Callback<AgentAvailableEvent> agentavailable=(AgentAvailableEvent e)->{
+	private void subscribeToAgentAvailable(){
+		Callback<AgentAvailableEvent> agentAvailable=(AgentAvailableEvent e)->{
 			List<String> serials= e.getEventInformation();//requested agents
 			boolean availToMe=Squad.getInstance().getAgents(serials);//checks if the agents available and returns true if so
 			MessageBrokerImpl.getInstance().complete(e,availToMe);//resolves the event
 		};
-		this.subscribeEvent(AgentAvailableEvent.class,agentavailable);
+		this.subscribeEvent(AgentAvailableEvent.class,agentAvailable);
+	}
+
+	private  void subscribeToSendRelease(){
+		//MoneyPenny received this event from M inorder to execute a mission- whats requires an access to Squad
+		Callback<SendReleaseAgentsEvent> sendRelease=(SendReleaseAgentsEvent event)->{
+			String function=event.getFunction();
+			if(function.equals("send"))
+				Squad.getInstance().sendAgents(event.getAgentsSerials(),event.getDuration());
+			if(function.equals("release"))
+				Squad.getInstance().releaseAgents(event.getAgentsSerials());
+			event.setQserialNumber(serialNumber);
+			event.setAgentsNames(Squad.getInstance().getAgentsNames(event.getAgentsSerials()));
+		};
+		subscribeEvent(SendReleaseAgentsEvent.class,sendRelease);
+	}
+
+	private void subscribeToTermination(){
+		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
+			//terminate When the program duration over
+			terminate();
+		};
+		subscribeBroadcast(TerminationBroadCast.class,terminateCall);
+	}
+
+	@Override
+	protected void initialize() {
+		subscribeToAgentAvailable();
+		subscribeToSendRelease();
+		subscribeToTermination();
 	}
 
 }

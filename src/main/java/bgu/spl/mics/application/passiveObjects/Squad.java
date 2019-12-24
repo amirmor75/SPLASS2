@@ -45,10 +45,10 @@ public class Squad {
 
 	/**
 	 * simulates executing a mission by calling sleep.
-	 * @param time   milliseconds to sleep to sleep
+	 * @param time   time-ticks to sleep
 	 */
 	public synchronized void sendAgents(List<String> serials, int time){
-		try {Thread.sleep(time);} catch (InterruptedException ignored) {}
+		try {Thread.sleep(time*100);} catch (InterruptedException ignored) {}
 		releaseAgents(serials);
 	}
 

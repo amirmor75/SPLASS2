@@ -31,9 +31,9 @@ public class Intelligence extends Subscriber {
 		missions=missionsInfo;
 	}
 
-	@Override
-	protected void initialize() {
+	private void subscribeToTimeBroadCast(){
 		Callback<TimeBroadCast> intelligenceCall=(TimeBroadCast timeDuration)->{
+			//execute missions according their issued time
 			List<MissionInfo> forDeletion=new LinkedList<>();
 			for(MissionInfo mission:missions) {
 				if(timeDuration.getCurrentDuration()>mission.getTimeExpired()) //if the time expired then the mission it won’t be executed at all.
@@ -44,6 +44,20 @@ public class Intelligence extends Subscriber {
 			missions.removeAll(forDeletion);
 		};
 		subscribeBroadcast(TimeBroadCast.class,intelligenceCall);
+	}
+
+	private void subscribeToTermination(){
+		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
+			//terminate When the program duration over
+			terminate();
+		};
+		subscribeBroadcast(TerminationBroadCast.class,terminateCall);
+	}
+
+	@Override
+	protected void initialize() {
+		subscribeToTimeBroadCast();
+		subscribeToTermination();
 	}
 
 

@@ -12,7 +12,7 @@ public class Agent {
 
 	private String serialNumber;
 	private String name;
-	private AtomicBoolean available;
+	private boolean available;
 
 	/**
 	 * Sets the serial number of an agent.
@@ -52,26 +52,20 @@ public class Agent {
      * @return if the agent is available.
      */
 	public boolean isAvailable() {
-		return available.get();
+		return available;
 	}
 
 	/**
 	 * Acquires an agent.
 	 */
 	public void acquire(){
-		boolean localAva;
-		do{
-			localAva=available.get();
-		}while(!available.compareAndSet(localAva,false));
+		available=false;
 	}
 
 	/**
 	 * Releases an agent.
 	 */
 	public void release(){
-		boolean localAva;
-		do{
-			localAva=available.get();
-		}while(!available.compareAndSet(localAva,true));
+		available=true;
 	}
 }

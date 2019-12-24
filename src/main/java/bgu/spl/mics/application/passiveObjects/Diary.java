@@ -49,12 +49,7 @@ public class Diary {
 		newReports.add(reportToAdd);
 		do{
 			reps=reports.get();
-		}while(!reports.compareAndSet(reps,newReports));
-
-		int oldTotal;
-		do{
-			oldTotal=total.get();
-		}while(!total.compareAndSet(oldTotal,oldTotal+1));
+		}while(!this.reports.compareAndSet(reps,newReports));
 	}
 
 	/**
@@ -76,5 +71,15 @@ public class Diary {
 	 */
 	public int getTotal(){
 		return total.get();
+	}
+
+	/**
+	 * Increments the total number of received missions by 1
+	 */
+	public void incrementTotal(){
+		int oldTotal;
+		do{
+			oldTotal=total.get();
+		}while(!total.compareAndSet(oldTotal,oldTotal+1));
 	}
 }

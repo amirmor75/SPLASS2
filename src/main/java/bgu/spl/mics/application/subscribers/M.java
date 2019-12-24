@@ -2,10 +2,10 @@ package bgu.spl.mics.application.subscribers;
 
 import bgu.spl.mics.*;
 
+import bgu.spl.mics.SendReleaseAgentsEvent;
 import bgu.spl.mics.application.passiveObjects.Diary;
 import bgu.spl.mics.application.passiveObjects.MissionInfo;
-
-import java.sql.Time;
+import bgu.spl.mics.application.passiveObjects.Report;
 
 
 /**
@@ -31,17 +31,15 @@ public class M extends Subscriber {
 		currentDuration=0;
 	}
 
-
-	@Override
-	protected synchronized void initialize() {
-
+	private void subscribedToTimeBroadCast(){
 		//This callback update the current duration of the program when a timeBroadCast received.
 		Callback<TimeBroadCast> timeCall=(TimeBroadCast e)->{
 			currentDuration=e.getCurrentDuration();
 		};
 		this.subscribeBroadcast(TimeBroadCast.class,timeCall);
+	}
 
-
+	private void subscribeToMissionReceived(){
 		//our callback wait() for the AgentsAvailableEvent we sent to Moneypenny
 		Callback<MissionReceivedEvent> mCall=(MissionReceivedEvent e)->{
 			//asks for the availability of the agents
@@ -53,21 +51,47 @@ public class M extends Subscriber {
 			GadgetAvailableEvent gadgetAvailableEvent=new GadgetAvailableEvent(e.getEventInformation().getGadget());
 			Future<Boolean> gadgetAvailFuture = getSimplePublisher().sendEvent(gadgetAvailableEvent);
 
-			//checks if the mission’s expiry time had reached. If not - then M acknowledges Moneypenny
-			// to Agent.send() the required agents, and a report will be added to the diary
-			if(currentDuration<info.getTimeExpired()){
-
+			//M acknowledges Moneypenny to send the required agents
+			//if expiry time passed, M orders Moneypenny to release() all agents.
+			if(agentAvailFuture.isDone() && gadgetAvailFuture.isDone() && currentDuration<info.getTimeExpired()){
+				SendReleaseAgentsEvent sendRelease=new SendReleaseAgentsEvent("send",agentAvailableEvent.getEventInformation(),info.getDuration());
+				getSimplePublisher().sendEvent(sendRelease);
+				//add a report to the diary
+				Report report=new Report();
+				report.setMissionName(info.getMissionName());
+				report.setM(this.serialNumber);
+				report.setMoneypenny(sendRelease.getQserialNumber());
+				report.setAgentsSerialNumbersNumber(info.getSerialAgentsNumbers());
+				report.setAgentsNames(sendRelease.getAgentsNames());
+				report.setGadgetName(info.getGadget());
+				report.setTimeCreated(currentDuration);
+				report.setTimeCreated(info.getTimeIssued());
+				report.setQTime(gadgetAvailableEvent.getTimeQreceived());
+				Diary.getInstance().addReport(report);
 			}
-			//In any case (mission either executed or aborted), Diary.total will be incremented.
-
+			else{
+				getSimplePublisher().sendEvent(new SendReleaseAgentsEvent("release",agentAvailableEvent.getEventInformation(),info.getDuration()));
+			}
+			Diary.getInstance().incrementTotal(); //In any case (mission either executed or aborted), Diary.total will be incremented.
 		};
-
 		this.subscribeEvent(MissionReceivedEvent.class,mCall);
+	}
+
+	private void subscriveToTermination(){
+		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
+			//terminate When the program duration over
+			terminate();
+		};
+		subscribeBroadcast(TerminationBroadCast.class,terminateCall);
+	}
+
+	@Override
+	protected synchronized void initialize() {
+		subscribeToMissionReceived();
+		subscribedToTimeBroadCast();
+		subscriveToTermination();
   }
   
 
-	
-		
-	
 
 }

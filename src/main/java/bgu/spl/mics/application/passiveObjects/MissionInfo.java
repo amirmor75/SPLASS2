@@ -28,7 +28,7 @@ public class MissionInfo {
 	/**
      * Retrieves the name of the mission.
      */
-	public String getMissionName() {return this.name;}
+	public String getMissionName() {return name;}
 
     /**
      * Sets the serial agent number.

@@ -4,6 +4,7 @@ public class GadgetAvailableEvent implements Event<Boolean> {
 
     private String eventInformation;
     private Future<Boolean> future;
+    private int timeQreceived;
 
     public GadgetAvailableEvent(String gadget){
         eventInformation=gadget;
@@ -14,4 +15,8 @@ public class GadgetAvailableEvent implements Event<Boolean> {
     }
 
     public Future<Boolean> getFuture(){return future;}
+
+    public int getTimeQreceived() { return timeQreceived;  }
+
+    public void setTimeQreceived(int timeQreceived) {  this.timeQreceived = timeQreceived;   }
 }
