@@ -1,10 +1,11 @@
 package bgu.spl.mics;
 
-public class GadgetAvailableEvent implements Event<Boolean> {
+
+public class GadgetAvailableEvent implements Event<FutureResult<Integer,Integer>> {
 
     private String eventInformation;
-    private Future<Boolean> future;
-    private int timeQreceived;
+    private Future<FutureResult<Integer,Integer>> futureAvailavle;
+
 
     public GadgetAvailableEvent(String gadget){
         eventInformation=gadget;
@@ -14,9 +15,5 @@ public class GadgetAvailableEvent implements Event<Boolean> {
         return eventInformation;
     }
 
-    public Future<Boolean> getFuture(){return future;}
-
-    public int getTimeQreceived() { return timeQreceived;  }
-
-    public void setTimeQreceived(int timeQreceived) {  this.timeQreceived = timeQreceived;   }
+    public Future<FutureResult<Integer,Integer>> getFuture(){return futureAvailavle;}
 }

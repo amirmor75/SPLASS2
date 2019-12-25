@@ -7,14 +7,12 @@ public class SendReleaseAgentsEvent implements Event<Boolean>{
     private String function;
     private List<String> agentsSerials;
     private int duration;
-    private int QserialNumber;
-    private List<String> agentsNames;
+    private Future<Boolean> future;
 
     public SendReleaseAgentsEvent(String function, List<String> agents, int duration) {
         this.function=function;
         this.agentsSerials=agents;
         this.duration=duration;
-        QserialNumber=0;
     }
 
     public String getFunction() {
@@ -27,16 +25,15 @@ public class SendReleaseAgentsEvent implements Event<Boolean>{
 
     public void setDuration(int duration) {  this.duration = duration;    }
 
-    public int getQserialNumber() { return QserialNumber;    }
-
-    public void setQserialNumber(int qserialNumber) {  QserialNumber = qserialNumber;    }
-
     public List<String> getAgentsSerials() { return agentsSerials; }
 
     public void setAgentsSerials(List<String> agentsSerials) { this.agentsSerials = agentsSerials;  }
 
-    public List<String> getAgentsNames() { return agentsNames; }
+    public Future<Boolean> getFuture() {
+        return future;
+    }
 
-    public void setAgentsNames(List<String> agentsNames) { this.agentsNames = agentsNames;  }
-
+    public void setFuture(Future<Boolean> future) {
+        this.future = future;
+    }
 }

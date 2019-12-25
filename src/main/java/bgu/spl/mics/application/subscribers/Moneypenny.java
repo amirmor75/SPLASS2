@@ -27,29 +27,34 @@ public class Moneypenny extends Subscriber {
 
 	private void subscribeToAgentAvailable(){
 		Callback<AgentAvailableEvent> agentAvailable=(AgentAvailableEvent e)->{
+			System.out.println("MP "+serialNumber+" got AgentAvailableEvent");
+
+			Future<Boolean> send=e.getSend();
+
 			List<String> serials= e.getEventInformation();//requested agents
 			boolean availToMe=Squad.getInstance().getAgents(serials);//checks if the agents available and returns true if so
-			MessageBrokerImpl.getInstance().complete(e,availToMe);//resolves the event
+
+			System.out.println("AgentAvailableEvent "+serialNumber+". are they: "+availToMe);
+
+			FutureResult result=new FutureResult(availToMe,serialNumber,Squad.getInstance().getAgentsNames(serials));
+			complete(e,result);//resolves the event
+
+			Boolean isSend=send.get();
+			if(isSend) {
+				Squad.getInstance().sendAgents(e.getEventInformation(), e.getDuration());
+				System.out.println("MP "+serialNumber+ " sending...");
+			}
+			else {
+				Squad.getInstance().releaseAgents(e.getEventInformation());
+				System.out.println("MP "+serialNumber+ " releasing...");
+			}
 		};
 		this.subscribeEvent(AgentAvailableEvent.class,agentAvailable);
 	}
 
-	private  void subscribeToSendRelease(){
-		//MoneyPenny received this event from M inorder to execute a mission- whats requires an access to Squad
-		Callback<SendReleaseAgentsEvent> sendRelease=(SendReleaseAgentsEvent event)->{
-			String function=event.getFunction();
-			if(function.equals("send"))
-				Squad.getInstance().sendAgents(event.getAgentsSerials(),event.getDuration());
-			if(function.equals("release"))
-				Squad.getInstance().releaseAgents(event.getAgentsSerials());
-			event.setQserialNumber(serialNumber);
-			event.setAgentsNames(Squad.getInstance().getAgentsNames(event.getAgentsSerials()));
-		};
-		subscribeEvent(SendReleaseAgentsEvent.class,sendRelease);
-	}
-
 	private void subscribeToTermination(){
 		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
+			System.out.println("MP "+serialNumber+"  terminating...");
 			//terminate When the program duration over
 			terminate();
 		};
@@ -59,7 +64,6 @@ public class Moneypenny extends Subscriber {
 	@Override
 	protected void initialize() {
 		subscribeToAgentAvailable();
-		subscribeToSendRelease();
 		subscribeToTermination();
 	}
 

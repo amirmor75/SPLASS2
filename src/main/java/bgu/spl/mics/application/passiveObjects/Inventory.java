@@ -57,11 +57,7 @@ public class Inventory {
 	 * @post: exists()==false && gadgets.size()=={@pre gadgets}.size()
      */
 	public synchronized boolean getItem(String gadget){
-		boolean isExist=gadgets.contains(gadget);
-		if(isExist) {
-			gadgets.remove(gadget);
-		}
-		return isExist;
+		return gadgets.remove(gadget);
 	}
 
 	/**

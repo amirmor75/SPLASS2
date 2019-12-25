@@ -7,10 +7,9 @@ import com.google.gson.GsonBuilder;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Passive object representing the diary where all reports are stored.
@@ -21,7 +20,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Diary {
-	private AtomicReference<List<Report>> reports=new AtomicReference<>(new LinkedList<>());
+	//It is a thread-safe variant of ArrayList.
+	private CopyOnWriteArrayList<Report> reports= new CopyOnWriteArrayList<>();
 	private AtomicInteger total=new AtomicInteger(0);
 
 	private static class SingletonHolder {
@@ -36,7 +36,7 @@ public class Diary {
 	}
 
 	public List<Report> getReports() {
-		return reports.get();
+		return reports;
 	}
 
 	/**
@@ -44,12 +44,7 @@ public class Diary {
 	 * @param reportToAdd - the report to add
 	 */
 	public void addReport(Report reportToAdd){
-		List<Report> reps;
-		List<Report> newReports=reports.get();
-		newReports.add(reportToAdd);
-		do{
-			reps=reports.get();
-		}while(!this.reports.compareAndSet(reps,newReports));
+		reports.add(reportToAdd);
 	}
 
 	/**
@@ -58,7 +53,7 @@ public class Diary {
 	 * List of all the reports in the diary.
 	 * This method is called by the main method in order to generate the output.
 	 */
-	public void printToFile(String filename){ //need to printed pretty format
+	public void printToFile(String filename){
 		try (Writer writer = new FileWriter(filename)) {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			gson.toJson(this, writer);

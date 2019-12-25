@@ -1,4 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
+import com.google.gson.internal.bind.util.ISO8601Utils;
+import org.w3c.dom.ls.LSOutput;
+
 import java.util.*;
 
 /**
@@ -8,7 +11,7 @@ import java.util.*;
  * You may add ONLY private fields and methods to this class.
  */
 public class Squad {
-  
+
 	private Map<String, Agent> agentMap=new Hashtable<>();//serial number is the key
 
 	private static class SingletonHolder {
@@ -38,6 +41,7 @@ public class Squad {
 	 * Releases agents.
 	 */
 	public synchronized void releaseAgents(List<String> serials){
+		System.out.println("agents release!!!!!!!!!!!!!!!!!!!!!!!!!");
 		for (String serial: serials) {
 			agentMap.get(serial).release();
 		}
@@ -65,13 +69,7 @@ public class Squad {
 			}
 			else{
 				Agent agent=agentMap.get(s);
-				while (!agent.isAvailable()) {
-					try {
-						agent.wait();
-					} catch (InterruptedException ignored) { }
-				}
-				agent.acquire();
-				agent.notifyAll();
+				agent.acquire(); //the wait() takes place in Agent
 			}
 		}
 		return true;

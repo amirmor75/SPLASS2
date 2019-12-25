@@ -92,7 +92,6 @@ public class MessageBrokerImpl implements MessageBroker {
 		Future<T> future=new Future<>();
 		futureMap.put(e,future);
 		return future;
-
 	}
 
 	/**
@@ -104,18 +103,17 @@ public class MessageBrokerImpl implements MessageBroker {
 		subscribers.putIfAbsent(m, mQueue);
 	}
 
-
 	@Override
 	public void unregister(Subscriber m) {//not really safe (safe with synchronized (this) )
 		synchronized (this) {//because deleting is not safe for the use of other threads
 			Set<Class<? extends Event>> Ekeys = eventSubscriberMap.keySet();
-			for (Class<? extends Event> key : Ekeys) {
+			for (Class<? extends Event> key : Ekeys)
 				eventSubscriberMap.get(key).remove(m);
-			}
+
 			Set<Class<? extends Broadcast>> Bkeys = broadcastSubscriberMap.keySet();
-			for (Class<? extends Broadcast> key : Bkeys) {
+			for (Class<? extends Broadcast> key : Bkeys)
 				broadcastSubscriberMap.get(key).remove(m);
-			}
+
 			subscribers.remove(m);
 		}
 	}

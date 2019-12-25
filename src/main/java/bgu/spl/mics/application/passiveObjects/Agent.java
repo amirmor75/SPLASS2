@@ -12,7 +12,7 @@ public class Agent {
 
 	private String serialNumber;
 	private String name;
-	private boolean available;
+	private boolean available=true;
 
 	/**
 	 * Sets the serial number of an agent.
@@ -58,8 +58,17 @@ public class Agent {
 	/**
 	 * Acquires an agent.
 	 */
-	public void acquire(){
-		available=false;
+	public void acquire()  {
+		synchronized (this) {
+			while (!available) {
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+				}
+			}
+			available = false;
+			this.notifyAll();
+		}
 	}
 
 	/**

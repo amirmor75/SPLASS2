@@ -2,11 +2,6 @@ package bgu.spl.mics.application.subscribers;
 
 import bgu.spl.mics.*;
 import bgu.spl.mics.application.passiveObjects.Inventory;
-import bgu.spl.mics.application.passiveObjects.MissionInfo;
-import bgu.spl.mics.application.passiveObjects.Squad;
-
-import javax.swing.*;
-import java.util.List;
 
 /**
  * Q is the only Subscriber\Publisher that has access to the {@link bgu.spl.mics.application.passiveObjects.Inventory}.
@@ -26,6 +21,9 @@ public class Q extends Subscriber {
 	private void subscriveToTimeBroadCast(){
 		//This callback update the current duration of the program when a timeBroadCast received.
 		Callback<TimeBroadCast> timeCall=(TimeBroadCast e)->{
+
+			System.out.println("Q got time: "+e.getCurrentDuration());
+
 			currentDuration=e.getCurrentDuration();
 		};
 		this.subscribeBroadcast(TimeBroadCast.class,timeCall);
@@ -33,19 +31,22 @@ public class Q extends Subscriber {
 
 	private void subscribeToGadgetAvailable(){
 		Callback<GadgetAvailableEvent> callback=(GadgetAvailableEvent e)->{
+			System.out.println("Q got GadgetAvailableEvent");
+
 			String gadget= e.getEventInformation();//requested gadget
 			boolean availToMe= Inventory.getInstance().getItem(gadget);//checks if the gadget available, returns true and remove it from list if so
-			MessageBrokerImpl.getInstance().complete(e,availToMe);//resolves the event
 
-			//The time-tick in which Q receives a GadgetAvailableEvent will be printed in the report
-			e.setTimeQreceived(currentDuration);
+			System.out.println("Q need to find gadget: "+gadget+ ". isExist: "+ availToMe);
 
+			FutureResult result=new FutureResult(availToMe,currentDuration,currentDuration); //The time-tick in which Q receives a GadgetAvailableEvent will be printed in the report
+			complete(e,result);//resolves the event
 		};
 		this.subscribeEvent(GadgetAvailableEvent.class, callback);
 	}
 
 	private void subscribeToTermination(){
 		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
+			System.out.println("Q terminating...");
 			//terminate When the program duration over
 			terminate();
 		};
@@ -54,8 +55,8 @@ public class Q extends Subscriber {
 
 	@Override
 	protected void initialize() {
-		subscribeToGadgetAvailable();
 		subscriveToTimeBroadCast();
+		subscribeToGadgetAvailable();
 		subscribeToTermination();
 	}
 

@@ -33,13 +33,17 @@ public class Intelligence extends Subscriber {
 
 	private void subscribeToTimeBroadCast(){
 		Callback<TimeBroadCast> intelligenceCall=(TimeBroadCast timeDuration)->{
+			System.out.println("Intelligence got timeBroadCast: "+timeDuration.getCurrentDuration());
+
 			//execute missions according their issued time
 			List<MissionInfo> forDeletion=new LinkedList<>();
 			for(MissionInfo mission:missions) {
 				if(timeDuration.getCurrentDuration()>mission.getTimeExpired()) //if the time expired then the mission it won’t be executed at all.
 					forDeletion.add(mission);
-				else if (mission.getTimeIssued() == timeDuration.getCurrentDuration())
+				else if (mission.getTimeIssued() == timeDuration.getCurrentDuration()) {
+					System.out.println("Intelligence sends event "+mission.getMissionName());
 					getSimplePublisher().sendEvent(new MissionReceivedEvent(mission));
+				}
 			}
 			missions.removeAll(forDeletion);
 		};
@@ -48,6 +52,8 @@ public class Intelligence extends Subscriber {
 
 	private void subscribeToTermination(){
 		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
+			System.out.println("Intelligence terminating...");
+
 			//terminate When the program duration over
 			terminate();
 		};

@@ -45,6 +45,7 @@ public class TimeService extends Publisher {
 	@Override
 	public void run() {
 		while(currentDuration<duration) {
+			System.out.println("TimeService- time is:"+ currentDuration);
 			try {
 				Thread.sleep(100);
 				getSimplePublisher().sendBroadcast(new TimeBroadCast(currentDuration));
@@ -53,6 +54,7 @@ public class TimeService extends Publisher {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("Terminate Bitch");
 		getSimplePublisher().sendBroadcast(new TerminationBroadCast());
 	}
 

@@ -7,8 +7,7 @@ import bgu.spl.mics.Subscriber;
 import bgu.spl.mics.TimeBroadCast;
 import bgu.spl.mics.application.passiveObjects.*;
 import bgu.spl.mics.application.publishers.TimeService;
-import bgu.spl.mics.application.subscribers.M;
-import bgu.spl.mics.application.subscribers.Moneypenny;
+import bgu.spl.mics.application.subscribers.*;
 import com.google.gson.Gson;
 import java.io.*;
 import java.util.LinkedList;
@@ -44,24 +43,27 @@ public class MI6Runner {
 
             //Inventory:
             Inventory.getInstance().load(input.getInventory());
-            Inventory inventory = Inventory.getInstance();
 
             //Squad:
             Squad.getInstance().load(input.getSquad());
-            Squad squad = Squad.getInstance();
 
-            //Subscribers- M, MoneyPenny, Intelligence:
+            //Subscribers- M, MoneyPenny, MoneypennySendAgents, Intelligence and Q:
             List<Subscriber> subscribers = new LinkedList<>();
 
-            for (int i = 0; i < input.getServices().getM(); i++)
-                subscribers.add(new M(i));
+            subscribers.add(new Q());
 
             for (int i = 0; i < input.getServices().getMoneypenny(); i++)
                 subscribers.add(new Moneypenny(i));
 
+            for (int i = 0; i < input.getServices().getM(); i++)
+                subscribers.add(new M(i));
+
+            for (int i = 0; i < input.getServices().getIntelligence().size(); i++)
+                subscribers.add(input.getServices().getIntelligence().get(i));
+
+
             //TimeService:
             TimeService timeService = new TimeService(input.getServices().getTime());
-
 
             //Task Executor
             ExecutorService e = Executors.newFixedThreadPool(subscribers.size()+1);
@@ -75,6 +77,7 @@ public class MI6Runner {
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException ignored) { }
+
 
             //outputs
             Inventory.getInstance().printToFile(inventoryOutputName);
