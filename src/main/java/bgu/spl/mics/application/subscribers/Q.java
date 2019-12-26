@@ -35,11 +35,16 @@ public class Q extends Subscriber {
 
 			String gadget= e.getEventInformation();//requested gadget
 			boolean availToMe= Inventory.getInstance().getItem(gadget);//checks if the gadget available, returns true and remove it from list if so
+			FutureResult<Integer,Integer> result = new FutureResult<>(availToMe, currentDuration, currentDuration); //The time-tick in which Q receives a GadgetAvailableEvent will be printed in the report
+			if(Thread.currentThread().isInterrupted()) {
+				complete(e, result);//resolves the event
+				terminate();
+			}
+			else {
+				System.out.println("Q need to find gadget: " + gadget + ". isExist: " + availToMe);
 
-			System.out.println("Q need to find gadget: "+gadget+ ". isExist: "+ availToMe);
-
-			FutureResult result=new FutureResult(availToMe,currentDuration,currentDuration); //The time-tick in which Q receives a GadgetAvailableEvent will be printed in the report
-			complete(e,result);//resolves the event
+				complete(e, result);//resolves the event
+			}
 		};
 		this.subscribeEvent(GadgetAvailableEvent.class, callback);
 	}

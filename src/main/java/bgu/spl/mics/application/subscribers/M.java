@@ -50,46 +50,62 @@ public class M extends Subscriber {
 			System.out.println("M  "+serialNumber+" recieved mission"+e.getEventInformation().getMissionName() +" from Inetllegence");
 			Diary.getInstance().incrementTotal(); //In any case (mission either executed or aborted), Diary.total will be incremented.
 
-			//true- send,  false- release
-			Future<Boolean> isSend=new Future<>();
-			//asks for the availability of the agents
-			MissionInfo info =e.getEventInformation();
+
+			Future<Boolean> isSend=new Future<>(); //true- send,  false- release
+
+			MissionInfo info =e.getEventInformation();//asks for the availability of the agents
 			AgentAvailableEvent agentAvailableEvent=new AgentAvailableEvent(info.getSerialAgentsNumbers(),isSend,info.getDuration());
 			Future<FutureResult<Integer, List<String>>> agentAvailFuture = getSimplePublisher().sendEvent(agentAvailableEvent);
 
-			if(agentAvailFuture.get().isAvailable()) {
+			System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+			if (agentAvailFuture.get()!=null && agentAvailFuture.get().isAvailable()) {
+				System.out.println("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+				if(Thread.currentThread().isInterrupted()) {
+					terminate();
+					System.out.println("M is terminating");
+				}
+				else {
+					GadgetAvailableEvent gadgetAvailableEvent = new GadgetAvailableEvent(info.getGadget()); //asks for the availability of gadgets
+					Future<FutureResult<Integer, Integer>> gadgetAvailFuture = getSimplePublisher().sendEvent(gadgetAvailableEvent);
 
-				//asks for the availability of gadgets
-				GadgetAvailableEvent gadgetAvailableEvent = new GadgetAvailableEvent(info.getGadget());
-				Future<FutureResult<Integer, Integer>> gadgetAvailFuture = getSimplePublisher().sendEvent(gadgetAvailableEvent);
+					//M acknowledges Moneypenny to send the required agents
+					//if expiry time passed, M orders Moneypenny to release() all agents.
+					System.out.println("ccccccccccccccccccccccccccccccccc");
+					if (gadgetAvailFuture.get()!=null && gadgetAvailFuture.get().isAvailable() && currentDuration < info.getTimeExpired()) {
+						System.out.println("dddddddddddddddddddddddddddddddd");
 
-				//M acknowledges Moneypenny to send the required agents
-				//if expiry time passed, M orders Moneypenny to release() all agents.
-				if (gadgetAvailFuture.get().isAvailable() && currentDuration < info.getTimeExpired()) {
+						if(Thread.currentThread().isInterrupted()) {
+							terminate();
+							System.out.println("M is terminating");
+						}
+						else {
+							System.out.println("mission " + info.getMissionName() + " is executing...");
 
-					System.out.println("mission " + info.getMissionName() + " is executing...");
-
-					isSend.resolve(true);
-
-					//add a report to the diary
-					Report report = new Report();
-					report.setMissionName(info.getMissionName());
-					report.setM(this.serialNumber);
-					report.setMoneypenny(agentAvailFuture.get().getSecResult());
-					report.setAgentsSerialNumbersNumber(info.getSerialAgentsNumbers());
-					report.setAgentsNames(agentAvailFuture.get().getThirdResult());
-					report.setGadgetName(info.getGadget());
-					report.setTimeCreated(currentDuration);
-					report.setTimeIssued(info.getTimeIssued());
-					report.setQTime(gadgetAvailFuture.get().getSecResult());
-					Diary.getInstance().addReport(report);
-				} else {
+							isSend.resolve(true);
+							Report report = new Report();//add a report to the diary
+							report.setMissionName(info.getMissionName());
+							report.setM(this.serialNumber);
+							report.setMoneypenny(agentAvailFuture.get().getSecResult());
+							report.setAgentsSerialNumbersNumber(info.getSerialAgentsNumbers());
+							report.setAgentsNames(agentAvailFuture.get().getThirdResult());
+							report.setGadgetName(info.getGadget());
+							report.setTimeCreated(currentDuration);
+							report.setTimeIssued(info.getTimeIssued());
+							report.setQTime(gadgetAvailFuture.get().getSecResult());
+							Diary.getInstance().addReport(report);
+						}
+					}
+					else {
 					isSend.resolve(false);
+					}
 				}
 			}
-			else{
+			else {
+				System.out.println("XXXXXXXXXXXXXXXXXXXX");
 				isSend.resolve(false);
+				System.out.println("YYYYYYYYYYYYYYYYYYYY");
 			}
+
 		};
 		this.subscribeEvent(MissionReceivedEvent.class,mCall);
 	}

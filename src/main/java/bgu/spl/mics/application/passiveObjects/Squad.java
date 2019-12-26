@@ -1,6 +1,4 @@
 package bgu.spl.mics.application.passiveObjects;
-import com.google.gson.internal.bind.util.ISO8601Utils;
-import org.w3c.dom.ls.LSOutput;
 
 import java.util.*;
 
@@ -40,10 +38,10 @@ public class Squad {
 	/**
 	 * Releases agents.
 	 */
-	public synchronized void releaseAgents(List<String> serials){
-		System.out.println("agents release!!!!!!!!!!!!!!!!!!!!!!!!!");
+	public void releaseAgents(List<String> serials){
 		for (String serial: serials) {
-			agentMap.get(serial).release();
+			if(agentMap.get(serial)!=null)
+				agentMap.get(serial).release();
 		}
 	}
 
@@ -51,8 +49,8 @@ public class Squad {
 	 * simulates executing a mission by calling sleep.
 	 * @param time   time-ticks to sleep
 	 */
-	public synchronized void sendAgents(List<String> serials, int time){
-		try {Thread.sleep(time*100);} catch (InterruptedException ignored) {}
+	public void sendAgents(List<String> serials, int time){
+		try {Thread.sleep(time*100);} catch (InterruptedException ignored) { Thread.currentThread().interrupt();}
 		releaseAgents(serials);
 	}
 
@@ -61,7 +59,7 @@ public class Squad {
 	 * @param serials   the serial numbers of the agents
 	 * @return ‘false’ if an agent of serialNumber ‘serial’ is missing, and ‘true’ otherwise
 	 */
-	public synchronized boolean getAgents(List<String> serials){
+	public boolean getAgents(List<String> serials){
 		for (String s:serials){
 			if(!agentMap.containsKey(s)){
 				releaseAgents(serials);
@@ -69,7 +67,10 @@ public class Squad {
 			}
 			else{
 				Agent agent=agentMap.get(s);
+				System.out.println("trying acquire "+ agent.getName());
 				agent.acquire(); //the wait() takes place in Agent
+				System.out.println(agent.getName()+" acquired");
+
 			}
 		}
 		return true;
@@ -80,7 +81,7 @@ public class Squad {
      * @param serials the serial numbers of the agents
      * @return a list of the names of the agents with the specified serials.
      */
-    public synchronized List<String> getAgentsNames(List<String> serials){
+    public List<String> getAgentsNames(List<String> serials){
         List<String> names=new LinkedList<>();
         Iterator<String> serial=serials.iterator();
         Agent agent;

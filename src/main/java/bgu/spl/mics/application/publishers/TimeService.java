@@ -1,13 +1,9 @@
 package bgu.spl.mics.application.publishers;
 
-import bgu.spl.mics.MessageBrokerImpl;
 import bgu.spl.mics.Publisher;
 import bgu.spl.mics.TerminationBroadCast;
 import bgu.spl.mics.TimeBroadCast;
-import bgu.spl.mics.application.passiveObjects.Inventory;
 
-import java.util.Timer;
-import java.util.concurrent.TimeUnit;
 
 /**
  * TimeService is the global system timer There is only one instance of this Publisher.
@@ -56,14 +52,6 @@ public class TimeService extends Publisher {
 		}
 		System.out.println("Terminate Bitch");
 		getSimplePublisher().sendBroadcast(new TerminationBroadCast());
-	}
-
-	public void setDuration(int duration) {
-		this.duration = duration;
-	}
-
-	public int getCurrentDuration(){
-		return currentDuration;
 	}
 
 }

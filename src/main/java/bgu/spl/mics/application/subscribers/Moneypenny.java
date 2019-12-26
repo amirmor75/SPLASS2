@@ -29,24 +29,50 @@ public class Moneypenny extends Subscriber {
 		Callback<AgentAvailableEvent> agentAvailable=(AgentAvailableEvent e)->{
 			System.out.println("MP "+serialNumber+" got AgentAvailableEvent");
 
-			Future<Boolean> send=e.getSend();
-
 			List<String> serials= e.getEventInformation();//requested agents
+			System.out.println("MP "+serialNumber+" try getAgents");
 			boolean availToMe=Squad.getInstance().getAgents(serials);//checks if the agents available and returns true if so
+			FutureResult result = new FutureResult(availToMe, serialNumber, Squad.getInstance().getAgentsNames(serials));
 
-			System.out.println("AgentAvailableEvent "+serialNumber+". are they: "+availToMe);
-
-			FutureResult result=new FutureResult(availToMe,serialNumber,Squad.getInstance().getAgentsNames(serials));
-			complete(e,result);//resolves the event
-
-			Boolean isSend=send.get();
-			if(isSend) {
-				Squad.getInstance().sendAgents(e.getEventInformation(), e.getDuration());
-				System.out.println("MP "+serialNumber+ " sending...");
+			if(Thread.currentThread().isInterrupted()) {
+				complete(e, result);//resolves the event
+				terminate();
+				System.out.println("MP "+serialNumber+" is terminating");
 			}
 			else {
-				Squad.getInstance().releaseAgents(e.getEventInformation());
-				System.out.println("MP "+serialNumber+ " releasing...");
+				System.out.println("MP " + serialNumber + " getAgents");
+
+				System.out.println("AgentAvailableEvent " + serialNumber + ". are they: " + availToMe);
+
+				complete(e, result);//resolves the event
+
+				Future<Boolean> send = e.getSend();
+				Boolean isSend = send.get();
+				if (isSend!=null && isSend) {
+					System.out.println("try to send");
+					if(Thread.currentThread().isInterrupted()) {
+						complete(e, result);//resolves the event
+						terminate();
+					}
+					else {
+						Squad.getInstance().sendAgents(e.getEventInformation(), e.getDuration());
+						if(Thread.currentThread().isInterrupted()) {
+							complete(e, result);//resolves the event
+							terminate();
+							System.out.println("MP "+serialNumber+" is terminating");
+						}
+						System.out.println("MP " + serialNumber + " sending...");
+					}
+				} else {
+					if(Thread.currentThread().isInterrupted()) {
+						complete(e, result);//resolves the event
+						terminate();
+					}
+					else {
+						Squad.getInstance().releaseAgents(e.getEventInformation());
+						System.out.println("MP " + serialNumber + " releasing...");
+					}
+				}
 			}
 		};
 		this.subscribeEvent(AgentAvailableEvent.class,agentAvailable);

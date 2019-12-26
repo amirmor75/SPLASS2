@@ -23,8 +23,6 @@ public class Inventory {
 	}
 	/**
      * Retrieves the single instance of this class.
-	 * @pre: none
-	 * @post: default
      */
 	public static Inventory getInstance() {
 			return SingletonHolder.instance;
@@ -36,9 +34,6 @@ public class Inventory {
      * <p>
      * @param inventory 	Data structure containing all data necessary for initialization
      * 						of the inventory.
-	 * @pre: none
-	 * @pre: for each i  {@param inventory} inventory[i]!=null
-	 * @post: gadgets.size=={@pre gadget}.size()+inventory.size()
      */
 	public synchronized void load (String[] inventory) {
 		for(int i=0;i<inventory.length;i++){
@@ -51,10 +46,6 @@ public class Inventory {
      * <p>
      * @param gadget 		Name of the gadget to check if available
      * @return 	‘false’ if the gadget is missing, and ‘true’ otherwise
-	 *
-	 * @pre: none
-	 * @post: exists()==true && gadgets.size()=={@pre gadgets}.size()-1
-	 * @post: exists()==false && gadgets.size()=={@pre gadgets}.size()
      */
 	public synchronized boolean getItem(String gadget){
 		return gadgets.remove(gadget);

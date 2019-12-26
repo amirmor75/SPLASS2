@@ -1,6 +1,5 @@
 package bgu.spl.mics.application.passiveObjects;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Passive data-object representing a information about an agent in MI6.
@@ -60,12 +59,11 @@ public class Agent {
 	 */
 	public void acquire()  {
 		synchronized (this) {
-			while (!available) {
 				try {
-					this.wait();
-				} catch (InterruptedException e) {
-				}
-			}
+					while (!available) {
+						this.wait();
+					}
+				} catch (InterruptedException e) { Thread.currentThread().interrupt();}
 			available = false;
 			this.notifyAll();
 		}
@@ -75,6 +73,9 @@ public class Agent {
 	 * Releases an agent.
 	 */
 	public void release(){
-		available=true;
+		synchronized (this) {
+			available = true;
+			this.notifyAll();
+		}
 	}
 }

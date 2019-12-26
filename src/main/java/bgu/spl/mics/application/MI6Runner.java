@@ -27,6 +27,7 @@ public class MI6Runner {
 //        if(args.length!=3)
 //            throw new IllegalArgumentException("Three inputs expected");
 
+        for(int j=0;j<20;j++){
         String inputFileName="/home/tal/Desktop/AA.json"; //args[0];
         String inventoryOutputName="inventory.json"; //args[1];
         String diaryOutputName="diary.json";// args[2];
@@ -62,26 +63,39 @@ public class MI6Runner {
                 subscribers.add(input.getServices().getIntelligence().get(i));
 
 
+            Thread[] threadArray = new Thread[subscribers.size() + 1];
             //TimeService:
-            TimeService timeService = new TimeService(input.getServices().getTime());
+            threadArray[0] = new Thread(new TimeService(input.getServices().getTime()));
+            for (int i = 1; i < threadArray.length; i++)
+                threadArray[i] = new Thread(subscribers.get(i - 1));
 
-            //Task Executor
-            ExecutorService e = Executors.newFixedThreadPool(subscribers.size()+1);
-            e.execute(timeService);
-            for (Subscriber subsriber: subscribers)
-                e.execute(subsriber);
+            for (int i = 0; i < threadArray.length; i++)
+                threadArray[i].start();
 
-            e.shutdown(); // the executor won't accept any more tasks, and will
-            // kill all of its threads when the submitted tasks are done.
-
+            //main Thread waits until time-service is terminating
             try {
-                Thread.sleep(3000);
-            } catch (InterruptedException ignored) { }
+                threadArray[0].join();
+            } catch (InterruptedException ignored) {
+            }
+
+            //wait two time-ticks to be sure all the thread were terminated
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ignored) {
+            }
+
+
+            //termination
+            for (int i = 0; i < threadArray.length; i++)
+                threadArray[i].interrupt();
 
 
             //outputs
             Inventory.getInstance().printToFile(inventoryOutputName);
             Diary.getInstance().printToFile(diaryOutputName);
+
+            System.out.println(j+"!!!!!!!!!!!");
+        }
         }
     }
 }

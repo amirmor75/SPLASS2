@@ -2,8 +2,6 @@ package bgu.spl.mics;
 
 
 import java.util.Hashtable;
-
-
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -24,9 +22,9 @@ public class MessageBrokerImpl implements MessageBroker {
 	 */
 
 	private Hashtable< Subscriber , LinkedBlockingQueue<Message> > subscribers=new Hashtable<>();
-	private Hashtable< Class<? extends Event> , LinkedBlockingQueue<Subscriber>> eventSubscriberMap=new Hashtable<>();
+	private Hashtable< Class<? extends Event<?>> , LinkedBlockingQueue<Subscriber>> eventSubscriberMap=new Hashtable<>();
 	private Hashtable< Class<? extends Broadcast> , LinkedBlockingQueue<Subscriber>> broadcastSubscriberMap=new Hashtable<>();
-	private Hashtable<Event,Future> futureMap=new Hashtable<>();
+	private Hashtable<Event<?>,Future> futureMap=new Hashtable<>();
 
 
 
@@ -43,35 +41,39 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {//safe
-		if(eventSubscriberMap.get(type)==null)
-			eventSubscriberMap.putIfAbsent(type,new LinkedBlockingQueue<>());
+		if (eventSubscriberMap.get(type) == null)
+			eventSubscriberMap.putIfAbsent(type, new LinkedBlockingQueue<>());
 		eventSubscriberMap.get(type).add(m);
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber m) {//safe
-		if(broadcastSubscriberMap.get(type)==null)
-			broadcastSubscriberMap.putIfAbsent(type,new LinkedBlockingQueue<>());
+		if (broadcastSubscriberMap.get(type) == null)
+			broadcastSubscriberMap.putIfAbsent(type, new LinkedBlockingQueue<>());
 		broadcastSubscriberMap.get(type).add(m);
 	}
 
 	@Override
-	public <T> void complete(Event<T> e, T result) {//safe
-		futureMap.get(e).resolve(result);
+	public <T> void complete(Event<T> e, T result) {
+		synchronized (this) {
+			futureMap.get(e).resolve(result);
+		}
 	}
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		try {
-			LinkedBlockingQueue<Subscriber> callTo = broadcastSubscriberMap.get(b.getClass());
-			if(callTo!=null) {
-				for (Subscriber s : callTo) {
-					if (subscribers.get(s) == null)
-						subscribers.putIfAbsent(s, new LinkedBlockingQueue<>());
-					subscribers.get(s).put(b);
+		synchronized (this) {
+			try {
+				LinkedBlockingQueue<Subscriber> callTo = broadcastSubscriberMap.get(b.getClass());
+				if (callTo != null) {
+					for (Subscriber s : callTo) {
+						if (subscribers.get(s) == null)
+							subscribers.putIfAbsent(s, new LinkedBlockingQueue<>());
+						subscribers.get(s).put(b);
+					}
 				}
-			}
-		} catch (InterruptedException ignore){}
+			} catch (InterruptedException ignore) {Thread.currentThread().interrupt(); }
+		}
 	}
 
 	/**impl:
@@ -81,17 +83,21 @@ public class MessageBrokerImpl implements MessageBroker {
 	@Override
 
 	public <T> Future<T> sendEvent(Event<T> e) {//safe
-		try {
-			LinkedBlockingQueue<Subscriber> subsToType = eventSubscriberMap.get(e.getClass());
-			if (subsToType != null) {
-				Subscriber roundRobined = subsToType.take();
-				subscribers.get(roundRobined).put(e);
-				subsToType.put(roundRobined);
-			}
-		}catch (InterruptedException ignored){}
-		Future<T> future=new Future<>();
-		futureMap.put(e,future);
-		return future;
+		synchronized (this) {
+			try {
+				LinkedBlockingQueue<Subscriber> subsToType = eventSubscriberMap.get(e.getClass());
+				if (subsToType != null && !subsToType.isEmpty()) {
+					Subscriber roundRobined = subsToType.take();
+					if(subscribers.get(roundRobined)!=null) {
+						subscribers.get(roundRobined).put(e);
+						subsToType.put(roundRobined);
+					}
+				}
+			} catch (InterruptedException ignored) { Thread.currentThread().interrupt();}
+			Future<T> future = new Future<>();
+			futureMap.put(e, future);
+			return future;
+		}
 	}
 
 	/**
@@ -106,8 +112,8 @@ public class MessageBrokerImpl implements MessageBroker {
 	@Override
 	public void unregister(Subscriber m) {//not really safe (safe with synchronized (this) )
 		synchronized (this) {//because deleting is not safe for the use of other threads
-			Set<Class<? extends Event>> Ekeys = eventSubscriberMap.keySet();
-			for (Class<? extends Event> key : Ekeys)
+			Set<Class<? extends Event<?>>> Ekeys = eventSubscriberMap.keySet();
+			for (Class<? extends Event<?>> key : Ekeys)
 				eventSubscriberMap.get(key).remove(m);
 
 			Set<Class<? extends Broadcast>> Bkeys = broadcastSubscriberMap.keySet();

@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -13,7 +15,8 @@ public class MissionInfo {
 	private List<String> serialAgentsNumbers;
 	private int duration;
 	private String gadget;
-	private String name;
+	@SerializedName("name")
+	private String missionName;
 	private int timeExpired;
 	private int timeIssued;
 
@@ -22,13 +25,13 @@ public class MissionInfo {
      * Sets the name of the mission.
      */
     public void setMissionName(String missionName) {
-        this.name=missionName;
+        this.missionName=missionName;
     }
 
 	/**
      * Retrieves the name of the mission.
      */
-	public String getMissionName() {return name;}
+	public String getMissionName() {return missionName;}
 
     /**
      * Sets the serial agent number.
