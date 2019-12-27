@@ -7,6 +7,7 @@ import bgu.spl.mics.application.passiveObjects.MissionInfo;
 import bgu.spl.mics.application.passiveObjects.Report;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -62,21 +63,19 @@ public class M extends Subscriber {
 				System.out.println("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
 				if(Thread.currentThread().isInterrupted()) {
 					terminate();
-					System.out.println("M is terminating");
+					isSend.resolve(false);
 				}
 				else {
 					GadgetAvailableEvent gadgetAvailableEvent = new GadgetAvailableEvent(info.getGadget()); //asks for the availability of gadgets
 					Future<FutureResult<Integer, Integer>> gadgetAvailFuture = getSimplePublisher().sendEvent(gadgetAvailableEvent);
 
-					//M acknowledges Moneypenny to send the required agents
-					//if expiry time passed, M orders Moneypenny to release() all agents.
 					System.out.println("ccccccccccccccccccccccccccccccccc");
 					if (gadgetAvailFuture.get()!=null && gadgetAvailFuture.get().isAvailable() && currentDuration < info.getTimeExpired()) {
 						System.out.println("dddddddddddddddddddddddddddddddd");
 
 						if(Thread.currentThread().isInterrupted()) {
 							terminate();
-							System.out.println("M is terminating");
+							isSend.resolve(false);
 						}
 						else {
 							System.out.println("mission " + info.getMissionName() + " is executing...");
@@ -95,25 +94,21 @@ public class M extends Subscriber {
 							Diary.getInstance().addReport(report);
 						}
 					}
+
 					else {
 					isSend.resolve(false);
 					}
 				}
 			}
 			else {
-				System.out.println("XXXXXXXXXXXXXXXXXXXX");
 				isSend.resolve(false);
-				System.out.println("YYYYYYYYYYYYYYYYYYYY");
 			}
-
 		};
 		this.subscribeEvent(MissionReceivedEvent.class,mCall);
 	}
 
 	private void subscriveToTermination(){
 		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
-			System.out.println("M  "+serialNumber+" terminating...");
-
 			//terminate When the program duration over
 			terminate();
 		};

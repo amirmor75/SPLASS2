@@ -38,7 +38,7 @@ public class Future<T> {
 				while (!isDone()) {
 					this.wait();
 				}
-				} catch (InterruptedException ignored) { }
+				} catch (InterruptedException ignored) {Thread.currentThread().interrupt(); }
 			return result;
 		}
 	}
@@ -78,7 +78,7 @@ public class Future<T> {
 				while (!isDone()) {
 					try {
 						this.wait(milliTime.convert(timeout, unit)); //waiting for {@param timeout} milliseconds
-					} catch (InterruptedException ignored) { }
+					} catch (InterruptedException ignored) {Thread.currentThread().interrupt(); }
 				}
 			}
 			if (isDone())

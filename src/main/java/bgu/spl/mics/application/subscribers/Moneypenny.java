@@ -35,9 +35,10 @@ public class Moneypenny extends Subscriber {
 			FutureResult result = new FutureResult(availToMe, serialNumber, Squad.getInstance().getAgentsNames(serials));
 
 			if(Thread.currentThread().isInterrupted()) {
+				System.out.println("XXXXXx");
 				complete(e, result);//resolves the event
+				System.out.println("YYYYYY");
 				terminate();
-				System.out.println("MP "+serialNumber+" is terminating");
 			}
 			else {
 				System.out.println("MP " + serialNumber + " getAgents");
@@ -45,7 +46,6 @@ public class Moneypenny extends Subscriber {
 				System.out.println("AgentAvailableEvent " + serialNumber + ". are they: " + availToMe);
 
 				complete(e, result);//resolves the event
-
 				Future<Boolean> send = e.getSend();
 				Boolean isSend = send.get();
 				if (isSend!=null && isSend) {
@@ -59,9 +59,7 @@ public class Moneypenny extends Subscriber {
 						if(Thread.currentThread().isInterrupted()) {
 							complete(e, result);//resolves the event
 							terminate();
-							System.out.println("MP "+serialNumber+" is terminating");
 						}
-						System.out.println("MP " + serialNumber + " sending...");
 					}
 				} else {
 					if(Thread.currentThread().isInterrupted()) {
@@ -80,7 +78,6 @@ public class Moneypenny extends Subscriber {
 
 	private void subscribeToTermination(){
 		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
-			System.out.println("MP "+serialNumber+"  terminating...");
 			//terminate When the program duration over
 			terminate();
 		};

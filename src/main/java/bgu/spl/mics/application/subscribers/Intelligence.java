@@ -35,7 +35,6 @@ public class Intelligence extends Subscriber {
 			for(MissionInfo mission:missions) {
 				if(Thread.currentThread().isInterrupted()) {
 					terminate();
-					System.out.println("Intelligence terminating...");
 				}
 
 				if(timeDuration.getCurrentDuration()>mission.getTimeExpired()) //if the time expired then the mission it won’t be executed at all.
@@ -52,8 +51,6 @@ public class Intelligence extends Subscriber {
 
 	private void subscribeToTermination(){
 		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
-			System.out.println("Intelligence terminating...");
-
 			//terminate When the program duration over
 			terminate();
 		};

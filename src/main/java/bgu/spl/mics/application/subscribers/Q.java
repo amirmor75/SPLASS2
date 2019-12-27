@@ -51,7 +51,6 @@ public class Q extends Subscriber {
 
 	private void subscribeToTermination(){
 		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
-			System.out.println("Q terminating...");
 			//terminate When the program duration over
 			terminate();
 		};

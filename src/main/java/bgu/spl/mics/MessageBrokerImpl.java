@@ -56,6 +56,7 @@ public class MessageBrokerImpl implements MessageBroker {
 	@Override
 	public <T> void complete(Event<T> e, T result) {
 		synchronized (this) {
+			System.out.println("complete");
 			futureMap.get(e).resolve(result);
 		}
 	}
@@ -105,8 +106,7 @@ public class MessageBrokerImpl implements MessageBroker {
 	 */
 	@Override
 	public void register(Subscriber m){//safe
-		LinkedBlockingQueue<Message> mQueue=new LinkedBlockingQueue<>();
-		subscribers.putIfAbsent(m, mQueue);
+		subscribers.putIfAbsent(m, new LinkedBlockingQueue<>());
 	}
 
 	@Override
@@ -121,6 +121,7 @@ public class MessageBrokerImpl implements MessageBroker {
 				broadcastSubscriberMap.get(key).remove(m);
 
 			subscribers.remove(m);
+			System.out.println(m.getName()+" unregistered");
 		}
 	}
 
