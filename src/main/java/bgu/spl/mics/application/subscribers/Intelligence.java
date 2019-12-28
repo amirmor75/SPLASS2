@@ -2,7 +2,6 @@ package bgu.spl.mics.application.subscribers;
 
 import bgu.spl.mics.*;
 import bgu.spl.mics.application.passiveObjects.MissionInfo;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,7 +14,6 @@ import java.util.List;
  */
 public class Intelligence extends Subscriber {
 
-	private int currentDuration;
 	private List<MissionInfo> missions;
 
 	public Intelligence() {
@@ -28,20 +26,43 @@ public class Intelligence extends Subscriber {
 		missions=missionsInfo;
 	}
 
-	@Override
-	protected void initialize() {
+	private void subscribeToTimeBroadCast(){
 		Callback<TimeBroadCast> intelligenceCall=(TimeBroadCast timeDuration)->{
-			currentDuration=timeDuration.getCurrentDuration();
-			List<MissionInfo> forDeletion=new LinkedList<>();
-			for(MissionInfo mission:missions) {
-				if(currentDuration>mission.getTimeExpired()) //if the time expired then the mission it won’t be executed at all.
-					forDeletion.add(mission);
-				else if (mission.getTimeIssued() == currentDuration)
-					getSimplePublisher().sendEvent(new MissionReceivedEvent(mission));
+			if(Thread.currentThread().isInterrupted())
+				terminate();
+			else {
+				//execute missions according their issued time
+				List<MissionInfo> forDeletion = new LinkedList<>();
+				for (MissionInfo mission : missions) {
+					if (Thread.currentThread().isInterrupted())
+						terminate();
+					else {
+						if (timeDuration.getCurrentDuration() > mission.getTimeExpired()) //if the time expired then the mission it won’t be executed at all.
+							forDeletion.add(mission);
+						else if (mission.getTimeIssued() == timeDuration.getCurrentDuration()) {
+							System.out.println("Intelligence sends event " + mission.getMissionName());
+							getSimplePublisher().sendEvent(new MissionReceivedEvent(mission));
+						}
+					}
+				}
+				missions.removeAll(forDeletion);
 			}
-			missions.removeAll(forDeletion);
 		};
 		subscribeBroadcast(TimeBroadCast.class,intelligenceCall);
+	}
+
+	private void subscribeToTermination(){
+		Callback<TerminationBroadCast> terminateCall=(TerminationBroadCast timeDuration)->{
+			//terminate When the program duration over
+			terminate();
+		};
+		subscribeBroadcast(TerminationBroadCast.class,terminateCall);
+	}
+
+	@Override
+	protected void initialize() {
+		subscribeToTimeBroadCast();
+		subscribeToTermination();
 	}
 
 

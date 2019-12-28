@@ -1,6 +1,5 @@
 package bgu.spl.mics.application.passiveObjects;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Passive data-object representing a information about an agent in MI6.
@@ -12,7 +11,7 @@ public class Agent {
 
 	private String serialNumber;
 	private String name;
-	private AtomicBoolean available;
+	private boolean available=true;
 
 	/**
 	 * Sets the serial number of an agent.
@@ -52,26 +51,31 @@ public class Agent {
      * @return if the agent is available.
      */
 	public boolean isAvailable() {
-		return available.get();
+		return available;
 	}
 
 	/**
 	 * Acquires an agent.
 	 */
-	public void acquire(){
-		boolean localAva;
-		do{
-			localAva=available.get();
-		}while(!available.compareAndSet(localAva,false));
+	public void acquire()  {
+		synchronized (this) {
+				try {
+					while (!available) {
+						this.wait();
+					}
+				} catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+			available = false;
+			this.notifyAll();
+		}
 	}
 
 	/**
 	 * Releases an agent.
 	 */
 	public void release(){
-		boolean localAva;
-		do{
-			localAva=available.get();
-		}while(!available.compareAndSet(localAva,true));
+		synchronized (this) {
+			available = true;
+			this.notifyAll();
+		}
 	}
 }

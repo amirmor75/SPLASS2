@@ -1,13 +1,10 @@
 package bgu.spl.mics.application.passiveObjects;
 
-
-
-
 import com.google.gson.Gson;
-
-import java.io.File;
 import java.io.FileWriter;
-import java.util.Iterator;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,14 +16,13 @@ import java.util.List;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Inventory {
-	private List<String> gadgets;
+	private List<String> gadgets=new LinkedList<>();
+
 	private static class SingletonHolder {
 		private static Inventory instance=new Inventory();
 	}
 	/**
      * Retrieves the single instance of this class.
-	 * @pre: none
-	 * @post: default
      */
 	public static Inventory getInstance() {
 			return SingletonHolder.instance;
@@ -38,9 +34,6 @@ public class Inventory {
      * <p>
      * @param inventory 	Data structure containing all data necessary for initialization
      * 						of the inventory.
-	 * @pre: none
-	 * @pre: for each i  {@param inventory} inventory[i]!=null
-	 * @post: gadgets.size=={@pre gadget}.size()+inventory.size()
      */
 	public synchronized void load (String[] inventory) {
 		for(int i=0;i<inventory.length;i++){
@@ -53,17 +46,9 @@ public class Inventory {
      * <p>
      * @param gadget 		Name of the gadget to check if available
      * @return 	‘false’ if the gadget is missing, and ‘true’ otherwise
-	 *
-	 * @pre: none
-	 * @post: exists()==true && gadgets.size()=={@pre gadgets}.size()-1
-	 * @post: exists()==false && gadgets.size()=={@pre gadgets}.size()
      */
 	public synchronized boolean getItem(String gadget){
-		boolean isExist=gadgets.contains(gadget);
-		if(isExist) {
-			gadgets.remove(gadget);
-		}
-		return isExist;
+		return gadgets.remove(gadget);
 	}
 
 	/**
@@ -76,14 +61,10 @@ public class Inventory {
 	 * after termination of all other threads.
 	 */
 	public void printToFile(String filename) {
-		Gson gson = new Gson();
-		File file = new File(filename);
-		try {
-			FileWriter writer = new FileWriter(file);
-			Iterator<String> gad = gadgets.iterator();
-			while (gad.hasNext()) {
-				gson.toJson(gad.next(), writer);
-			}
-		}catch (Exception ignore){}
+		try (Writer writer = new FileWriter(filename)) {
+			Gson gson = new Gson();
+			gson.toJson(gadgets, writer);
+		} catch (IOException ignored) {
+		}
 	}
 }

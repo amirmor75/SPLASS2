@@ -2,11 +2,14 @@ package bgu.spl.mics.application.passiveObjects;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.io.File;
 import java.io.FileWriter;
-import java.util.Iterator;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Passive object representing the diary where all reports are stored.
@@ -17,12 +20,13 @@ import java.util.List;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Diary {
-	private List<Report> reports;
-	private int total=0;
+	//It is a thread-safe variant of ArrayList.
+	private CopyOnWriteArrayList<Report> reports= new CopyOnWriteArrayList<>();
+	private AtomicInteger total=new AtomicInteger(0);
+
 	private static class SingletonHolder {
 		private static Diary instance = new Diary();
 	}
-
 
 	/**
 	 * Retrieves the single instance of this class.
@@ -39,35 +43,21 @@ public class Diary {
 	 * adds a report to the diary
 	 * @param reportToAdd - the report to add
 	 */
-	public void addReport(Report reportToAdd){//not elegant, need to be atomic!!!!!
-		synchronized (this){
-			reports.add(reportToAdd);
-		}
+	public void addReport(Report reportToAdd){
+		reports.add(reportToAdd);
 	}
 
 	/**
-	 *
 	 * <p>
 	 * Prints to a file name @filename a serialized object List<Report> which is a
 	 * List of all the reports in the diary.
 	 * This method is called by the main method in order to generate the output.
 	 */
 	public void printToFile(String filename){
-		Gson gson = new Gson();
-		File file=new File(filename);
-		try{
-			FileWriter writer = new FileWriter(file);
-			Iterator<Report> reportIterator=reports.iterator();
-			while(reportIterator.hasNext()){
-				Report currentRep=reportIterator.next();
-				String missionName=currentRep.getMissionName();
-				int timeCreated=currentRep.getTimeCreated();
-				int M=currentRep.getM();
-				String info= String.format("missionName: %s, timeCreated: %s,M: %s",missionName,timeCreated,M);
-				gson.toJson(info,writer);
-			}
-			gson.toJson("number of missions:"+total,writer);
-		}catch(Exception ignored){}
+		try (Writer writer = new FileWriter(filename)) {
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			gson.toJson(this, writer);
+		} catch (IOException ignored) { }
 	}
 
 	/**
@@ -75,6 +65,16 @@ public class Diary {
 	 * @return the total number of received missions (executed / aborted) be all the M-instances.
 	 */
 	public int getTotal(){
-		return total;
+		return total.get();
+	}
+
+	/**
+	 * Increments the total number of received missions by 1
+	 */
+	public void incrementTotal(){
+		int oldTotal;
+		do{
+			oldTotal=total.get();
+		}while(!total.compareAndSet(oldTotal,oldTotal+1));
 	}
 }

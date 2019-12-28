@@ -16,9 +16,9 @@ public class Report {
 	private List<String> agentsSerialNumbers;
 	private List<String> agentsNames;
 	private String gadgetName;
-	private int qTime;
-	private int timeIssued;
 	private int timeCreated;
+	private int timeIssued;
+	private int qTime;
 	/**
      * Retrieves the mission name.
      */

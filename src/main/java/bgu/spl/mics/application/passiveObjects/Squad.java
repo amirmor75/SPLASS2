@@ -1,8 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * Passive data-object representing a information about an agent in MI6.
@@ -11,8 +9,8 @@ import java.util.Map;
  * You may add ONLY private fields and methods to this class.
  */
 public class Squad {
-  
-	private Map<String, Agent> agentMap;//serial number is the key
+
+	private Map<String, Agent> agentMap=new Hashtable<>();//serial number is the key
 
 	private static class SingletonHolder {
 		private static Squad instance=new Squad();
@@ -35,15 +33,15 @@ public class Squad {
 	public synchronized void load (Agent[] agents) {
 		for (Agent agent: agents)
 			agentMap.put(agent.getSerialNumber(),agent);
-
 	}
 
 	/**
 	 * Releases agents.
 	 */
-	public synchronized void releaseAgents(List<String> serials){
+	public void releaseAgents(List<String> serials){
 		for (String serial: serials) {
-			agentMap.get(serial).release();
+			if(agentMap.get(serial)!=null)
+				agentMap.get(serial).release();
 		}
 	}
 
@@ -51,30 +49,12 @@ public class Squad {
 	 * simulates executing a mission by calling sleep.
 	 * @param time   time-ticks to sleep
 	 */
-	//get jkjj
-	public synchronized void sendAgents(List<String> serials, int time){
-		try {Thread.sleep(time/100);} catch (InterruptedException ignored) {}
+	public void sendAgents(List<String> serials, int time){
+		try {Thread.sleep(time*100);} catch (InterruptedException ignored) {
+			Thread.currentThread().interrupt();
+		}
 		releaseAgents(serials);
 	}
-
-	/**
-	 * this is a blocking method- it wait until the agent is available for new mission
-	 * when the agent available- He will be acquired to new mission
-	 * @param agent an Agent from the map
-	 */
-	private synchronized void acquireAgent(Agent agent){
-		// synchronized agent is not good..
-		// synchronized this is the worst
-		// doubt synchronized(agent)
-		while (!agent.isAvailable()) {
-			try {
-				agent.wait();
-			} catch (InterruptedException ignored) { }
-		}
-		agent.acquire();
-		agent.notifyAll();
-	}
-
 
 	/**
 	 * acquires an agent, i.e. holds the agent until the caller is done with it
@@ -88,7 +68,9 @@ public class Squad {
 				return false;
 			}
 			else{
-				acquireAgent(agentMap.get(s));
+				Agent agent=agentMap.get(s);
+				agent.acquire(); //the wait() takes place in Agent
+				System.out.println(agent.getName()+" acquired");
 			}
 		}
 		return true;

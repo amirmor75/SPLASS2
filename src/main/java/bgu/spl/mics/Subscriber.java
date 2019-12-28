@@ -24,7 +24,7 @@ public abstract class Subscriber extends RunnableSubPub {
      * The abstract Subscriber stores this callback together with the
      * type of the message is related to.
      */
-    private Hashtable<Class<? extends Message>,Callback> callbacks;
+    private Hashtable<Class<? extends Message>,Callback<? extends Message>> callbacks;
 
     /**
      * @param name the Subscriber name (used mainly for debugging purposes -
@@ -32,6 +32,7 @@ public abstract class Subscriber extends RunnableSubPub {
      */
     public Subscriber(String name) {
         super(name);
+        callbacks=new Hashtable<>();
     }
 
     /**
@@ -110,23 +111,24 @@ public abstract class Subscriber extends RunnableSubPub {
     /**
      * The entry point of the Subscriber.
      * otherwise you will end up in an infinite loop.
-     *
-     *              * 1. wait() for MB to put Event inside our queue
-     *              * 2. takes message and execute with callback
-     *              * 3. we know already what his callback
      */
     @Override
     public final void run() {
         MessageBrokerImpl.getInstance().register(this);
         initialize();
-        while (!terminated) {//!terminated is given
+        while (!terminated) {
             try {
                 Message m=MessageBrokerImpl.getInstance().awaitMessage(this);
-                callbacks.get(m.getClass()).call(m);
-            }catch(InterruptedException illegal){ MessageBrokerImpl.getInstance().register(this); }//??????
-
-            MessageBrokerImpl.getInstance().unregister(this);
+                @SuppressWarnings("unchecked")
+                Callback<Message> callback= (Callback<Message>) callbacks.get(m.getClass());
+                callback.call(m);
+            }catch(InterruptedException illegal){
+                MessageBrokerImpl.getInstance().register(this);
+                Thread.currentThread().interrupt();
+            }
         }
+        MessageBrokerImpl.getInstance().unregister(this);
+        System.out.println(getName()+" unregistered");
     }
 
 }

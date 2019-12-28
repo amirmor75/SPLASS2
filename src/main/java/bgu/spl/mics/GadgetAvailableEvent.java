@@ -1,10 +1,12 @@
 package bgu.spl.mics;
 
-public class GadgetAvailableEvent implements Event<String> {
 
+public class GadgetAvailableEvent implements Event<FutureResult<Integer,Integer>> {
 
     private String eventInformation;
-    private Future<String> future;
+    private Future<FutureResult<Integer,Integer>> futureAvailavle;
+
+
 
     public GadgetAvailableEvent(String gadget){
         eventInformation=gadget;
@@ -14,5 +16,5 @@ public class GadgetAvailableEvent implements Event<String> {
         return eventInformation;
     }
 
-    public Future<String> getFuture(){return future;}
+    public Future<FutureResult<Integer,Integer>> getFuture(){return futureAvailavle;}
 }
