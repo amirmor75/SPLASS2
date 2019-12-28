@@ -1,6 +1,5 @@
 package bgu.spl.mics.application;
 
-
 import bgu.spl.mics.Subscriber;
 import bgu.spl.mics.application.passiveObjects.*;
 import bgu.spl.mics.application.publishers.TimeService;
@@ -19,12 +18,13 @@ import java.util.List;
 public class MI6Runner {
 
     public static void main(String[] args) throws IOException {
-//        if(args.length!=3)
-//            throw new IllegalArgumentException("Three inputs expected");
+        if(args.length!=3)
+            throw new IllegalArgumentException("Three inputs expected");
 
-        String inputFileName="/home/tal/Desktop/AA.json"; //args[0];
-        String inventoryOutputName="inventory.json"; //args[1];
-        String diaryOutputName="diary.json";// args[2];
+        String inputFileName=args[0];
+        String inventoryOutputName=args[1];
+        String diaryOutputName=args[2];
+
 
         InputJsonDefinition input=null;
         try (Reader reader = new FileReader(inputFileName)) {
@@ -32,9 +32,6 @@ public class MI6Runner {
         }catch(FileNotFoundException ignored){ System.out.println("file not found"); }
 
         if(input!=null) {
-            /**
-             * initialize all classes by the input json.
-             */
 
             //Inventory:
             Inventory.getInstance().load(input.getInventory());
@@ -53,9 +50,7 @@ public class MI6Runner {
             for (int i = 0; i < input.getServices().getM(); i++)
                 subscribers.add(new M(i));
 
-            for (int i = 0; i < input.getServices().getIntelligence().size(); i++)
-                subscribers.add(input.getServices().getIntelligence().get(i));
-
+            subscribers.addAll(input.getServices().getIntelligence());
 
             Thread[] threadArray = new Thread[subscribers.size() + 1];
             //TimeService:
@@ -63,21 +58,15 @@ public class MI6Runner {
             for (int i = 1; i < threadArray.length; i++)
                 threadArray[i] = new Thread(subscribers.get(i - 1));
 
-            for (int i = 0; i < threadArray.length; i++)
-                threadArray[i].start();
+            for (Thread thread : threadArray) thread.start();
 
             //main Thread waits until time-service is terminating
             try {
-                for(int i=0;i<threadArray.length;i++)
-                    threadArray[0].join();
-            } catch (InterruptedException ignored) {
-            }
-
-
+                threadArray[0].join();
+            } catch (InterruptedException ignored) { }
 
             //termination
-            for (int i = 0; i < threadArray.length; i++)
-                threadArray[i].interrupt();
+            for (Thread thread : threadArray) thread.interrupt();
 
 
             //outputs

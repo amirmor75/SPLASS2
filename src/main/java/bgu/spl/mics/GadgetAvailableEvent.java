@@ -7,6 +7,7 @@ public class GadgetAvailableEvent implements Event<FutureResult<Integer,Integer>
     private Future<FutureResult<Integer,Integer>> futureAvailavle;
 
 
+
     public GadgetAvailableEvent(String gadget){
         eventInformation=gadget;
     }

@@ -26,49 +26,35 @@ public class Moneypenny extends Subscriber {
 	}
 
 	private void subscribeToAgentAvailable(){
-		Callback<AgentAvailableEvent> agentAvailable=(AgentAvailableEvent e)->{
-			System.out.println("MP "+serialNumber+" got AgentAvailableEvent");
-
-			List<String> serials= e.getEventInformation();//requested agents
-			System.out.println("MP "+serialNumber+" try getAgents");
-			boolean availToMe=Squad.getInstance().getAgents(serials);//checks if the agents available and returns true if so
-			FutureResult result = new FutureResult(availToMe, serialNumber, Squad.getInstance().getAgentsNames(serials));
-
-			if(Thread.currentThread().isInterrupted()) {
-				System.out.println("XXXXXx");
-				complete(e, result);//resolves the event
-				System.out.println("YYYYYY");
+		Callback<AgentAvailableEvent> agentAvailable=(AgentAvailableEvent e)-> {
+			if (Thread.currentThread().isInterrupted()) {
+				FutureResult<Integer,List<String>> result = new FutureResult<>(false, serialNumber, null);
+				complete(e, result);
 				terminate();
 			}
 			else {
-				System.out.println("MP " + serialNumber + " getAgents");
-
-				System.out.println("AgentAvailableEvent " + serialNumber + ". are they: " + availToMe);
-
+				System.out.println("MP " + serialNumber + " got AgentAvailableEvent");
+				List<String> serials = e.getEventInformation();//requested agents
+				boolean availToMe = Squad.getInstance().getAgents(serials);//checks if the agents available and returns true if so
+				FutureResult<Integer,List<String>> result = new FutureResult<>(availToMe, serialNumber, Squad.getInstance().getAgentsNames(serials));
 				complete(e, result);//resolves the event
-				Future<Boolean> send = e.getSend();
-				Boolean isSend = send.get();
-				if (isSend!=null && isSend) {
-					System.out.println("try to send");
-					if(Thread.currentThread().isInterrupted()) {
-						complete(e, result);//resolves the event
-						terminate();
-					}
-					else {
-						Squad.getInstance().sendAgents(e.getEventInformation(), e.getDuration());
-						if(Thread.currentThread().isInterrupted()) {
-							complete(e, result);//resolves the event
-							terminate();
-						}
-					}
+				if (Thread.currentThread().isInterrupted()) {
+					terminate();
 				} else {
-					if(Thread.currentThread().isInterrupted()) {
-						complete(e, result);//resolves the event
+					Future<Boolean> send = e.getSend();
+					Boolean isSend = send.get();
+					if (Thread.currentThread().isInterrupted()) {
 						terminate();
-					}
-					else {
-						Squad.getInstance().releaseAgents(e.getEventInformation());
-						System.out.println("MP " + serialNumber + " releasing...");
+					} else {
+						if (isSend != null && isSend) {
+							System.out.println("MP " + serialNumber + " sending...");
+							Squad.getInstance().sendAgents(e.getEventInformation(), e.getDuration());
+							if (Thread.currentThread().isInterrupted())
+								terminate();
+						} else {
+							Squad.getInstance().releaseAgents(e.getEventInformation());
+							System.out.println("MP " + serialNumber + " releasing...");
+						}
 					}
 				}
 			}
@@ -86,8 +72,8 @@ public class Moneypenny extends Subscriber {
 
 	@Override
 	protected void initialize() {
-		subscribeToAgentAvailable();
-		subscribeToTermination();
+        subscribeToTermination();
+        subscribeToAgentAvailable();
 	}
 
 }

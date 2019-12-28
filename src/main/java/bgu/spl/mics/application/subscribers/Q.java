@@ -21,9 +21,8 @@ public class Q extends Subscriber {
 	private void subscriveToTimeBroadCast(){
 		//This callback update the current duration of the program when a timeBroadCast received.
 		Callback<TimeBroadCast> timeCall=(TimeBroadCast e)->{
-
-			System.out.println("Q got time: "+e.getCurrentDuration());
-
+			if(Thread.currentThread().isInterrupted())
+				terminate();
 			currentDuration=e.getCurrentDuration();
 		};
 		this.subscribeBroadcast(TimeBroadCast.class,timeCall);
@@ -31,19 +30,21 @@ public class Q extends Subscriber {
 
 	private void subscribeToGadgetAvailable(){
 		Callback<GadgetAvailableEvent> callback=(GadgetAvailableEvent e)->{
-			System.out.println("Q got GadgetAvailableEvent");
-
-			String gadget= e.getEventInformation();//requested gadget
-			boolean availToMe= Inventory.getInstance().getItem(gadget);//checks if the gadget available, returns true and remove it from list if so
-			FutureResult<Integer,Integer> result = new FutureResult<>(availToMe, currentDuration, currentDuration); //The time-tick in which Q receives a GadgetAvailableEvent will be printed in the report
-			if(Thread.currentThread().isInterrupted()) {
-				complete(e, result);//resolves the event
+			if(Thread.currentThread().isInterrupted())
 				terminate();
-			}
 			else {
-				System.out.println("Q need to find gadget: " + gadget + ". isExist: " + availToMe);
-
+				System.out.println("Q got GadgetAvailableEvent");
+				String gadget = e.getEventInformation();//requested gadget
+				boolean availToMe = Inventory.getInstance().getItem(gadget);//checks if the gadget available, returns true and remove it from list if so
+				FutureResult<Integer, Integer> result = new FutureResult<>(availToMe, currentDuration, currentDuration); //The time-tick in which Q receives a GadgetAvailableEvent will be printed in the report
 				complete(e, result);//resolves the event
+				if (Thread.currentThread().isInterrupted()) {
+					complete(e, result);//resolves the event
+					terminate();
+				} else {
+					complete(e, result);//resolves the event
+					System.out.println("Q need to find gadget: " + gadget + ". isExist: " + availToMe);
+				}
 			}
 		};
 		this.subscribeEvent(GadgetAvailableEvent.class, callback);
@@ -59,9 +60,9 @@ public class Q extends Subscriber {
 
 	@Override
 	protected void initialize() {
-		subscriveToTimeBroadCast();
-		subscribeToGadgetAvailable();
 		subscribeToTermination();
+		subscribeToGadgetAvailable();
+		subscriveToTimeBroadCast();
 	}
 
 }

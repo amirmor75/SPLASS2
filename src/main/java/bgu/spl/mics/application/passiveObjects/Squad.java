@@ -50,7 +50,9 @@ public class Squad {
 	 * @param time   time-ticks to sleep
 	 */
 	public void sendAgents(List<String> serials, int time){
-		try {Thread.sleep(time*100);} catch (InterruptedException ignored) { Thread.currentThread().interrupt();}
+		try {Thread.sleep(time*100);} catch (InterruptedException ignored) {
+			Thread.currentThread().interrupt();
+		}
 		releaseAgents(serials);
 	}
 
@@ -59,7 +61,7 @@ public class Squad {
 	 * @param serials   the serial numbers of the agents
 	 * @return ‘false’ if an agent of serialNumber ‘serial’ is missing, and ‘true’ otherwise
 	 */
-	public boolean getAgents(List<String> serials){
+	public synchronized boolean getAgents(List<String> serials){
 		for (String s:serials){
 			if(!agentMap.containsKey(s)){
 				releaseAgents(serials);
@@ -67,10 +69,8 @@ public class Squad {
 			}
 			else{
 				Agent agent=agentMap.get(s);
-				System.out.println("trying acquire "+ agent.getName());
 				agent.acquire(); //the wait() takes place in Agent
 				System.out.println(agent.getName()+" acquired");
-
 			}
 		}
 		return true;

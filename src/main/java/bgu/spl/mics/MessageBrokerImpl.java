@@ -40,7 +40,7 @@ public class MessageBrokerImpl implements MessageBroker {
 
 
 	@Override
-	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {//safe
+	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m){//safe
 		if (eventSubscriberMap.get(type) == null)
 			eventSubscriberMap.putIfAbsent(type, new LinkedBlockingQueue<>());
 		eventSubscriberMap.get(type).add(m);
@@ -56,7 +56,6 @@ public class MessageBrokerImpl implements MessageBroker {
 	@Override
 	public <T> void complete(Event<T> e, T result) {
 		synchronized (this) {
-			System.out.println("complete");
 			futureMap.get(e).resolve(result);
 		}
 	}
@@ -85,17 +84,21 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	public <T> Future<T> sendEvent(Event<T> e) {//safe
 		synchronized (this) {
+			boolean couldResolved=false; //true if a subscriber that can resolve this event exists
 			try {
 				LinkedBlockingQueue<Subscriber> subsToType = eventSubscriberMap.get(e.getClass());
 				if (subsToType != null && !subsToType.isEmpty()) {
 					Subscriber roundRobined = subsToType.take();
 					if(subscribers.get(roundRobined)!=null) {
+						couldResolved=true;
 						subscribers.get(roundRobined).put(e);
 						subsToType.put(roundRobined);
 					}
 				}
 			} catch (InterruptedException ignored) { Thread.currentThread().interrupt();}
 			Future<T> future = new Future<>();
+			if(!couldResolved)
+				future.resolve(null);
 			futureMap.put(e, future);
 			return future;
 		}
@@ -110,8 +113,8 @@ public class MessageBrokerImpl implements MessageBroker {
 	}
 
 	@Override
-	public void unregister(Subscriber m) {//not really safe (safe with synchronized (this) )
-		synchronized (this) {//because deleting is not safe for the use of other threads
+	public void unregister(Subscriber m) {
+		synchronized (this) {
 			Set<Class<? extends Event<?>>> Ekeys = eventSubscriberMap.keySet();
 			for (Class<? extends Event<?>> key : Ekeys)
 				eventSubscriberMap.get(key).remove(m);
@@ -121,7 +124,6 @@ public class MessageBrokerImpl implements MessageBroker {
 				broadcastSubscriberMap.get(key).remove(m);
 
 			subscribers.remove(m);
-			System.out.println(m.getName()+" unregistered");
 		}
 	}
 

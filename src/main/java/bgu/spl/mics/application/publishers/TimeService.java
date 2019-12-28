@@ -41,16 +41,16 @@ public class TimeService extends Publisher {
 	@Override
 	public void run() {
 		while(currentDuration<duration) {
-			System.out.println("TimeService- time is:"+ currentDuration);
 			try {
 				Thread.sleep(100);
 				getSimplePublisher().sendBroadcast(new TimeBroadCast(currentDuration));
+				System.out.println("current time tick: "+currentDuration);
 				currentDuration = currentDuration + 1;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Terminate Bitch");
+		System.out.println("Terminating...");
 		getSimplePublisher().sendBroadcast(new TerminationBroadCast());
 	}
 

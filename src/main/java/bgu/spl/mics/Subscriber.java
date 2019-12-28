@@ -128,6 +128,7 @@ public abstract class Subscriber extends RunnableSubPub {
             }
         }
         MessageBrokerImpl.getInstance().unregister(this);
+        System.out.println(getName()+" unregistered");
     }
 
 }

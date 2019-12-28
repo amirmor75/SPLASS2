@@ -63,7 +63,7 @@ public class Agent {
 					while (!available) {
 						this.wait();
 					}
-				} catch (InterruptedException e) { Thread.currentThread().interrupt();}
+				} catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 			available = false;
 			this.notifyAll();
 		}
